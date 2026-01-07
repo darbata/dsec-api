@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.github;
+package io.darbata.basecampapi.github.internal.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

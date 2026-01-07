@@ -1,12 +1,10 @@
 package io.darbata.basecampapi;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.modulith.core.ApplicationModules;
 
-@Slf4j
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class ModularityTests {

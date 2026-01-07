@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.github;
+package io.darbata.basecampapi.github.internal.exception;
 
 public class ExpiredRefreshTokenException extends RuntimeException {
     public ExpiredRefreshTokenException(String message) {

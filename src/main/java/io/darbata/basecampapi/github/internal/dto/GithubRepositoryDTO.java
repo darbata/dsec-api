@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.github;
+package io.darbata.basecampapi.github.internal.dto;
 
 public record GithubRepositoryDTO (
         long id,
