@@ -1,15 +1,19 @@
-package io.darbata.basecampapi.users;
+package io.darbata.basecampapi.auth;
 
+import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
+import io.darbata.basecampapi.github.GithubProfileDTO;
+import io.darbata.basecampapi.github.GithubRepositoryDTO;
+import io.darbata.basecampapi.github.GithubService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,24 +23,58 @@ import java.util.UUID;
 @RequestMapping("/api")
 class UserController {
 
-    private final UserService userService;
+    private final AuthService authService;
+    private final ApplicationEventPublisher publisher;
+    private final GithubService githubService;
 
-    UserController(UserService userService) {
-        this.userService = userService;
+    UserController(AuthService userService, ApplicationEventPublisher publisher, GithubService githubService) {
+        this.authService = userService;
+        this.publisher = publisher;
+        this.githubService = githubService;
+    }
+
+
+
+    @PostMapping("/github/oauth")
+    ResponseEntity<?> enableGithubOauth(@AuthenticationPrincipal Jwt jwt, @RequestParam String code ) {
+        try {
+            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            publisher.publishEvent(new GithubExchangeTokenEvent(userId, code));
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName());
+            System.err.println("Error registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/repos")
+    ResponseEntity<?> enableGithubOauth(@AuthenticationPrincipal Jwt jwt) {
+        try {
+            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            List<GithubRepositoryDTO> repos = githubService.fetchUserRepositories(userId);
+            return ResponseEntity.ok(repos);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName());
+            System.err.println("Error registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     // returns who is authenticated?
     // this will use the current token, to update register user or update their details
     // UUID from Cognito will never change, but name and email may
-    @PostMapping("/auth")
-    ResponseEntity<?> auth(@AuthenticationPrincipal Jwt jwt) {
+    @GetMapping("/auth")
+    ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
         try {
             AuthUserRequest request = new AuthUserRequest (
                     UUID.fromString(jwt.getClaimAsString("sub")),
                     jwt.getClaimAsString("email"),
                     jwt.getClaimAsString("name")
             );
-            UserDTO dto = userService.save(request);
+
+            UserDetailsDTO dto = authService.save(request);
+
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.err.println(e.getClass().getName());
@@ -45,31 +83,43 @@ class UserController {
         }
     }
 
+
 }
 
 
 @Service
 @Transactional
-class UserService {
+public class AuthService {
+
+    private final GithubService githubService;
     private final UserRepository repo;
 
-    UserService(UserRepository repo) {
+    AuthService(GithubService githubService, UserRepository repo) {
+        this.githubService = githubService;
         this.repo = repo;
     }
 
-    public UserDTO save(AuthUserRequest request) {
+    public UserDetailsDTO save(AuthUserRequest request) {
         User user = new User(request.id(), request.email(), request.name());
 
-        if (repo.findById(request.id()).isPresent()) { // return existing user, updating details
-            user = repo.update(user);
-        } else { // return new user
-            user = repo.save(user);
-        }
+        User savedUser = repo.save(user);
 
-        return new UserDTO(user.email(), user.name());
+        UserDTO userDto = new UserDTO(
+                savedUser.email(),
+                savedUser.name()
+        );
+
+        GithubProfileDTO profile = githubService.fetchUserProfile(user.id());
+
+        return new UserDetailsDTO(userDto, profile);
     }
 
 }
+
+record UserDetailsDTO (
+        UserDTO userDTO,
+        GithubProfileDTO profileDTO
+) { }
 
 record UserDTO(
         String email,
@@ -121,8 +171,13 @@ class UserRepository {
 
     User save(User user) {
         String sql = """
-            INSERT INTO oauth_users (id, name, email)
-            VALUES (:id, :name, :email);
+        INSERT INTO oauth_users (id, email, name)
+        VALUES (:id, :email, :name)
+        ON CONFLICT (id)
+        DO UPDATE SET
+                      email = EXCLUDED.email,
+                      name = EXCLUDED.name;
+
         """;
 
         jdbcClient
