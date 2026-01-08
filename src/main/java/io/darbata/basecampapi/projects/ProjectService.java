@@ -92,7 +92,7 @@ class ProjectService {
     }
 
     public ProjectDTO create(UUID ownerId, String title, String description, long githubRepoId) {
-        GithubRepositoryDTO repoDto = githubService.fetchGithubRepositoryById(githubRepoId).orElseThrow();
+        GithubRepositoryDTO repoDto = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
         GithubProfileDTO profileDTO = githubService.fetchUserProfile(ownerId).orElseThrow();
         Project project = new Project(
                 null,
@@ -100,8 +100,6 @@ class ProjectService {
                 description,
                 repoDto.id(),
                 repoDto.name(),
-                repoDto.fullName(),
-                repoDto.description(),
                 repoDto.url(),
                 repoDto.language(),
                 ownerId,
@@ -148,8 +146,6 @@ record ProjectDTO (
     String description,
     long githubRepoId,
     String githubRepoName,
-    String githubRepoFullName,
-    String githubRepoDescription,
     String githubRepoUrl,
     String githubRepoLanguage,
     String ownerUsername
@@ -160,8 +156,6 @@ record ProjectDTO (
                 project.description(),
                 project.githubRepoId(),
                 project.githubRepoName(),
-                project.githubRepoFullName(),
-                project.githubRepoDescription(),
                 project.githubRepoUrl(),
                 project.githubRepoLanguage(),
                 project.ownerUsername()
@@ -175,8 +169,6 @@ record Project (
     String description,
     long githubRepoId,
     String githubRepoName,
-    String githubRepoFullName,
-    String githubRepoDescription,
     String githubRepoUrl,
     String githubRepoLanguage,
     UUID ownerId,
@@ -215,10 +207,10 @@ class ProjectRepository {
 
     public Project save(Project project) {
         String sql = """
-            INSERT INTO projects (title, description, github_repo_id, github_repo_name, github_repo_full_name,
-            github_repo_description, github_repo_url, github_repo_language, owner_id, owner_username)
-            VALUES (:title, :description, :githubRepoId, :githubRepoName, :githubRepoFullName,
-            :githubRepoDescription, :githubRepoUrl, :githubRepoLanguage, :ownerId, :ownerUsername);
+            INSERT INTO projects (title, description, github_repo_id, github_repo_name, 
+            github_repo_url, github_repo_language, owner_id, owner_username)
+            VALUES (:title, :description, :githubRepoId, :githubRepoName, 
+            :githubRepoUrl, :githubRepoLanguage, :ownerId, :ownerUsername);
         """;
 
         jdbcClient.sql(sql)
@@ -226,8 +218,6 @@ class ProjectRepository {
             .param("description", project.description())
             .param("githubRepoId", project.githubRepoId())
             .param("githubRepoName", project.githubRepoName())
-            .param("githubRepoFullName", project.githubRepoFullName())
-            .param("githubRepoDescription", project.githubRepoDescription())
             .param("githubRepoUrl", project.githubRepoUrl())
             .param("githubRepoLanguage", project.githubRepoLanguage())
             .param("ownerId", project.ownerId())

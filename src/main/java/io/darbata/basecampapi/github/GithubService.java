@@ -28,8 +28,11 @@ import java.util.UUID;
     private final GithubApiClient client;
     private final GithubTokenRepository tokenRepository;
 
-    public Optional<GithubRepositoryDTO> fetchGithubRepositoryById(long githubRepositoryId) {
-        throw new NotImplementedException();
+    public GithubRepositoryDTO fetchGithubRepositoryById(UUID userId, long githubRepositoryId) {
+        GithubToken token = getToken(userId);
+        GithubRepositoryDTO dto = client.getRepository(token.accessToken(), githubRepositoryId);
+        System.out.println(dto);
+        return dto;
     }
 
     public GithubService(TokenEncryptionService cipher, GithubApiClient client, GithubTokenRepository tokenRepository, ApplicationEventPublisher applicationEventPublisher) {
