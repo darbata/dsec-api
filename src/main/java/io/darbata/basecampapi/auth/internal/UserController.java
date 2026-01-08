@@ -4,7 +4,7 @@ import io.darbata.basecampapi.auth.AuthService;
 import io.darbata.basecampapi.auth.internal.dto.UserDetailsDTO;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
-import io.darbata.basecampapi.github.internal.dto.GithubRepositoryDTO;
+import io.darbata.basecampapi.github.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.GithubService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;

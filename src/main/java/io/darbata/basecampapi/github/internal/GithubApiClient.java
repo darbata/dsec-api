@@ -1,7 +1,7 @@
 package io.darbata.basecampapi.github.internal;
 
 import io.darbata.basecampapi.github.GithubProfileDTO;
-import io.darbata.basecampapi.github.internal.dto.GithubRepositoryDTO;
+import io.darbata.basecampapi.github.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.stereotype.Service;

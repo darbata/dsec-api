@@ -1,11 +1,11 @@
 package io.darbata.basecampapi.github;
 
 import io.darbata.basecampapi.github.internal.*;
-import io.darbata.basecampapi.github.internal.dto.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 import io.darbata.basecampapi.github.internal.exception.GithubCodeTokenExchangeException;
 import io.darbata.basecampapi.github.internal.exception.NoTokenException;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -27,6 +27,10 @@ import java.util.UUID;
     private final TokenEncryptionService cipher;
     private final GithubApiClient client;
     private final GithubTokenRepository tokenRepository;
+
+    public Optional<GithubRepositoryDTO> fetchGithubRepositoryById(long githubRepositoryId) {
+        throw new NotImplementedException();
+    }
 
     public GithubService(TokenEncryptionService cipher, GithubApiClient client, GithubTokenRepository tokenRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.cipher = cipher;
