@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.projects.internal.dto;
+package io.darbata.basecampapi.common;
 
 import java.util.List;
 
