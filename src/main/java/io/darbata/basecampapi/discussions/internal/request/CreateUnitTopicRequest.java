@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.discussions;
+package io.darbata.basecampapi.discussions.internal.request;
 
 public record CreateUnitTopicRequest(
     String unitCode,
