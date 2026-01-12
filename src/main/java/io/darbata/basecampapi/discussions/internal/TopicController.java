@@ -5,6 +5,7 @@ import io.darbata.basecampapi.discussions.TopicService;
 import io.darbata.basecampapi.discussions.internal.dto.DiscussionDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDetailsDTO;
+import io.darbata.basecampapi.discussions.internal.request.CreateTopicDiscussionRequest;
 import io.darbata.basecampapi.discussions.internal.request.CreateUnitTopicRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -63,15 +64,15 @@ class TopicController {
         }
     }
 
-    @PostMapping("/")
-    public ResponseEntity<?> createTopicDiscussion(
-            @AuthenticationPrincipal Jwt jwt, @RequestBody CreateTopicDiscussionRequest request)
+    @PostMapping("/{unit}")
+    public ResponseEntity<?> createUnitTopicDiscussion(
+            @AuthenticationPrincipal Jwt jwt, @PathVariable String unit, @RequestBody CreateTopicDiscussionRequest request)
     {
         try {
             UUID userId;
             userId = UUID.fromString(jwt.getClaimAsString("sub"));
-            DiscussionDTO dto = topicService.createDiscussion(
-                    request.topicId(), request.parentDiscussionId(), userId, request.content());
+            DiscussionDTO dto = topicService.createUnitTopicDiscussion(
+                    unit, request.parentDiscussionId(), userId, request.content());
             return  ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();

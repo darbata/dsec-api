@@ -104,6 +104,16 @@ public class TopicService {
         return dtos;
     }
 
+    public DiscussionDTO createUnitTopicDiscussion(String unitCode, UUID parentDiscussionId, UUID userId, String content) {
+        UnitTopic unitTopic = topicRepository.getUnitTopicByUnitCode(unitCode);
+
+        Discussion discussion = topicRepository.createDiscussion(
+                new Discussion(null, unitTopic.id(), parentDiscussionId, userId, content, null));
+
+        UserDTO user = userService.findUserById(discussion.userId());
+        return new DiscussionDTO(discussion.parentDiscussionId(), user, content, new ArrayList<>(), discussion.createdAt());
+    }
+
     public DiscussionDTO createDiscussion(UUID topicId, UUID parentDiscussionId, UUID userId, String content) {
         Discussion discussion = topicRepository.createDiscussion(
                 new Discussion(null, topicId, parentDiscussionId, userId, content, null));

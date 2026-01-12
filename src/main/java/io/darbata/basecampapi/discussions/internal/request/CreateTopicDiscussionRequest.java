@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.discussions.internal;
+package io.darbata.basecampapi.discussions.internal.request;
 
 import java.util.UUID;
 
