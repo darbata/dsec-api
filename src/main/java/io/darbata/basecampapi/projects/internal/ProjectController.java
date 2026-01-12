@@ -1,7 +1,7 @@
 package io.darbata.basecampapi.projects.internal;
 
 import io.darbata.basecampapi.projects.ProjectService;
-import io.darbata.basecampapi.projects.internal.dto.PageDTO;
+import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.projects.internal.dto.ProjectDTO;
 import io.darbata.basecampapi.projects.internal.request.CreateProjectRequest;
 import org.springframework.http.ResponseEntity;

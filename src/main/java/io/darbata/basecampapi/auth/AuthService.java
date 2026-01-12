@@ -1,7 +1,6 @@
 package io.darbata.basecampapi.auth;
 
 import io.darbata.basecampapi.auth.internal.*;
-import io.darbata.basecampapi.auth.internal.dto.UserDTO;
 import io.darbata.basecampapi.auth.internal.dto.UserDetailsDTO;
 import io.darbata.basecampapi.auth.internal.model.User;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;

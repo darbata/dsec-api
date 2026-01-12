@@ -1,20 +1,132 @@
 package io.darbata.basecampapi.discussions;
 
+import io.darbata.basecampapi.auth.UserDTO;
+import io.darbata.basecampapi.auth.UserService;
+import io.darbata.basecampapi.common.PageDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+
+@RestController
+@RequestMapping("/api/discussions")
+class TopicController {
+
+    private final TopicService topicService;
+
+    TopicController(TopicService topicService) {
+        this.topicService = topicService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTopicDetails(@PathVariable UUID id) {
+        try {
+            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetails(id);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+}
 
 @Service
 public class TopicService {
 
     private final TopicRepository topicRepository;
+    private final UserService userService;
 
-    public TopicService(TopicRepository topicRepository) {
+    public TopicService(TopicRepository topicRepository, UserService userService) {
         this.topicRepository = topicRepository;
+        this.userService = userService;
+    }
+
+    public UnitTopicDTO createUnitTopic(String unitCode, String unitSiteUrl, String description) {
+        UnitTopic topic = topicRepository.createUnitTopic(new UnitTopic(null, unitCode, unitSiteUrl, description));
+        return new UnitTopicDTO(topic.unitCode(), topic.unitSiteUrl(), topic.description());
+    }
+
+    public PageDTO<UnitTopicDTO> getUnitTopics(String sortCol, int pageSize, int pageNumber) {
+        List<UnitTopicDTO> topics = topicRepository.getUnitTopics(pageSize, pageNumber)
+                .stream().map(UnitTopicDTO::fromEntity).toList();
+        return new PageDTO<>(topics, sortCol, true, pageSize, pageNumber);
+    }
+
+    // get the unit topic full details as well as hierarchical discussions object
+    public UnitTopicDetailsDTO getUnitTopicDetails(UUID topicId) {
+        UnitTopic unitTopic = topicRepository.getUnitTopic(topicId);
+        List<Discussion> discussions = topicRepository.getTopicDiscussions(topicId);
+
+        Map<UUID, List<Discussion>> map = new HashMap<>();
+
+        // get all unique keys
+        for (Discussion discussion : discussions) {
+            if (!map.containsKey(discussion.id())) {
+                map.put(discussion.id(), new ArrayList<>());
+            }
+        }
+
+        // push all children discussions under them
+        for (Discussion discussion : discussions) {
+            if (discussion.parentDiscussionId() != null) {
+                map.get(discussion.parentDiscussionId()).add(discussion);
+            }
+        }
+
+        List<DiscussionDTO> discussionDtos = new ArrayList<>();
+
+        for (Discussion discussion : discussions) {
+            if (discussion.parentDiscussionId() != null) continue;
+
+            UserDTO user  = userService.findUserById(discussion.userId());
+            discussionDtos.add(new DiscussionDTO(
+                    null,
+                    user,
+                    discussion.content(),
+                    getHierarchicalDiscussions(map, discussion.id()),
+                    discussion.createdAt()
+            ));
+        }
+
+        UnitTopicDTO unitTopicDTO = new UnitTopicDTO(
+                unitTopic.unitCode(),
+                unitTopic.unitSiteUrl(),
+                unitTopic.description()
+        );
+
+        return new UnitTopicDetailsDTO(
+                unitTopicDTO,
+                discussionDtos
+        );
+    }
+
+    private ArrayList<DiscussionDTO> getHierarchicalDiscussions (Map<UUID, List<Discussion>> map, UUID parentDiscussionId) {
+        if (map.get(parentDiscussionId).isEmpty()) return null;
+
+        ArrayList<DiscussionDTO> dtos = new ArrayList<>();
+
+        for (Discussion discussion : map.get(parentDiscussionId)) {
+            UserDTO user = userService.findUserById(discussion.userId());
+
+            dtos.add(new DiscussionDTO(
+                    discussion.parentDiscussionId(),
+                    user,
+                    discussion.content(),
+                    getHierarchicalDiscussions(map, discussion.id()),
+                    discussion.createdAt()
+            ));
+        }
+
+        return dtos;
+    }
+
+    public DiscussionDTO createDiscussion() {
+        return null;
     }
 
 }
@@ -35,8 +147,21 @@ record Discussion (
     LocalDateTime createdAt
 ) { }
 
+record DiscussionDTO (
+    UUID parentDiscussionId,
+    UserDTO user,
+    String content,
+    List<DiscussionDTO> discussions,
+    LocalDateTime createdAt
+) { }
+
+record UnitTopicDetailsDTO (
+    UnitTopicDTO  unitTopic,
+    List<DiscussionDTO> discussions
+) { }
+
 @Repository
-class TopicRepository () {
+class TopicRepository {
 
     private final JdbcClient jdbcClient;
 
@@ -91,6 +216,28 @@ class TopicRepository () {
                 .param("userId", discussion.userId())
                 .param("content", discussion.content())
                 .query(Discussion.class)
+                .single();
+    }
+
+    List<Discussion> getTopicDiscussions(UUID topicId) {
+        String sql = """
+            SELECT * FROM discussions WHERE topic_id = :topicId;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("topicId", topicId)
+                .query(Discussion.class)
+                .list();
+    }
+
+    UnitTopic getUnitTopic(UUID topicId) {
+        String sql = """
+            SELECT * FROM unit_topics WHERE id = :topicId;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("topicId", topicId)
+                .query(UnitTopic.class)
                 .single();
     }
 }

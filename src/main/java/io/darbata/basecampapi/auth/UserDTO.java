@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.auth.internal.dto;
+package io.darbata.basecampapi.auth;
 
 public record UserDTO(
         String email,

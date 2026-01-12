@@ -3,7 +3,7 @@ package io.darbata.basecampapi.projects;
 import io.darbata.basecampapi.github.GithubProfileDTO;
 import io.darbata.basecampapi.github.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.GithubService;
-import io.darbata.basecampapi.projects.internal.dto.PageDTO;
+import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.projects.internal.model.Project;
 import io.darbata.basecampapi.projects.internal.dto.ProjectDTO;
 import io.darbata.basecampapi.projects.internal.ProjectRepository;
