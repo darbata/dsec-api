@@ -22,10 +22,11 @@ class TopicController {
         this.topicService = topicService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getTopicDetails(@PathVariable UUID id) {
+    @GetMapping("/{unitCode}")
+    public ResponseEntity<?> getTopicDetails(@PathVariable String unitCode) {
+        // accept unit code
         try {
-            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetails(id);
+            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetailsByUnitCode(unitCode);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();
@@ -33,7 +34,34 @@ class TopicController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/")
+    public ResponseEntity<?> createUnitTopic(@RequestBody CreateUnitTopicRequest request) {
+        try {
+            UnitTopicDTO dto = topicService.createUnitTopic(
+                    request.unitCode(), request.unitSiteUrl(), request.description());
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/units")
+    public ResponseEntity<?> getUnitTopics(@RequestParam int pageSize, @RequestParam int pageNum) {
+        try {
+            PageDTO<UnitTopicDTO> dto = topicService.getUnitTopics("unit_code", pageSize, pageNum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
+
+
 
 @Service
 public class TopicService {
@@ -58,9 +86,10 @@ public class TopicService {
     }
 
     // get the unit topic full details as well as hierarchical discussions object
-    public UnitTopicDetailsDTO getUnitTopicDetails(UUID topicId) {
-        UnitTopic unitTopic = topicRepository.getUnitTopic(topicId);
-        List<Discussion> discussions = topicRepository.getTopicDiscussions(topicId);
+    public UnitTopicDetailsDTO getUnitTopicDetailsByUnitCode(String unitCode) {
+
+        UnitTopic unitTopic = topicRepository.getUnitTopicByUnitCode(unitCode);
+        List<Discussion> discussions = topicRepository.getTopicDiscussions(unitTopic.id());
 
         Map<UUID, List<Discussion>> map = new HashMap<>();
 
@@ -125,8 +154,12 @@ public class TopicService {
         return dtos;
     }
 
-    public DiscussionDTO createDiscussion() {
-        return null;
+    public DiscussionDTO createDiscussion(UUID topicId, UUID parentDiscussionId, UUID userId, String content) {
+        Discussion discussion = topicRepository.createDiscussion(
+                new Discussion(null, topicId, parentDiscussionId, userId, content, null));
+
+        UserDTO user = userService.findUserById(discussion.userId());
+        return new DiscussionDTO(discussion.parentDiscussionId(), user, content, new ArrayList<>(), discussion.createdAt());
     }
 
 }
@@ -219,17 +252,6 @@ class TopicRepository {
                 .single();
     }
 
-    List<Discussion> getTopicDiscussions(UUID topicId) {
-        String sql = """
-            SELECT * FROM discussions WHERE topic_id = :topicId;
-        """;
-
-        return jdbcClient.sql(sql)
-                .param("topicId", topicId)
-                .query(Discussion.class)
-                .list();
-    }
-
     UnitTopic getUnitTopic(UUID topicId) {
         String sql = """
             SELECT * FROM unit_topics WHERE id = :topicId;
@@ -239,6 +261,28 @@ class TopicRepository {
                 .param("topicId", topicId)
                 .query(UnitTopic.class)
                 .single();
+    }
+
+    UnitTopic getUnitTopicByUnitCode(String unitCode) {
+        String sql = """
+            SELECT * FROM unit_topics WHERE unit_code = :unitCode;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("unitCode", unitCode)
+                .query(UnitTopic.class)
+                .single();
+    }
+
+    List<Discussion> getTopicDiscussions(UUID topicId) {
+        String sql = """
+            SELECT * FROM discussions WHERE topic_id = :topicId;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("topicId", topicId)
+                .query(Discussion.class)
+                .list();
     }
 }
 
