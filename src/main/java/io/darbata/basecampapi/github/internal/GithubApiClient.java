@@ -18,12 +18,12 @@ import java.util.List;
 @Service
 public interface GithubApiClient {
 
-    @GetExchange("https://api.github.com/user")
+    @GetExchange(value = "https://api.github.com/user", accept = "application/json")
     GithubProfileDTO fetchProfile(
             @RequestHeader("Authorization") String token
     );
 
-    @GetExchange("https://api.github.com/user/repos")
+    @GetExchange(value = "https://api.github.com/user/repos", accept = "application/json")
     List<GithubRepositoryDTO> fetchUserRepositories(
             @RequestHeader("Authorization") String token,
             @RequestParam("affiliation") String affiliation,
@@ -31,22 +31,22 @@ public interface GithubApiClient {
             @RequestParam("page") int page
     );
 
-    @PostExchange("https://github.com/login/oauth/access_token")
+    @PostExchange(value = "https://github.com/login/oauth/access_token", accept = "application/json")
     GithubTokenDTO exchangeCodeForToken(
             @RequestParam("client_id") String clientId,
             @RequestParam("client_secret") String clientSecret,
             @RequestParam("code") String code
     );
 
-    @PostExchange("https://github.com/login/oauth/access_token")
-    GithubToken refreshToken(
+    @PostExchange(value = "https://github.com/login/oauth/access_token", accept = "application/json")
+    GithubTokenDTO refreshToken(
             @RequestParam("client_id") String clientId,
             @RequestParam("client_secret") String clientSecret,
             @RequestParam("grant_type") String grantType,
             @RequestParam("refresh_token") String refreshToken
     );
 
-    @GetExchange("https://api.github.com/repositories/{id}")
+    @GetExchange(value = "https://api.github.com/repositories/{id}", accept = "application/json")
     GithubRepositoryDTO getRepository(
             @RequestHeader("Authorization") String token,
             @PathVariable("id") Long id

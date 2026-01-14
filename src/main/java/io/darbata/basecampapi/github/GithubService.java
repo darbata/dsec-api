@@ -3,13 +3,10 @@ package io.darbata.basecampapi.github;
 import io.darbata.basecampapi.github.internal.*;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 import io.darbata.basecampapi.github.internal.exception.GithubCodeTokenExchangeException;
-import io.darbata.basecampapi.github.internal.exception.NoTokenException;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,10 +26,9 @@ import java.util.UUID;
     private final GithubTokenRepository tokenRepository;
 
     public GithubRepositoryDTO fetchGithubRepositoryById(UUID userId, long githubRepositoryId) {
-        GithubToken token = getToken(userId);
-        GithubRepositoryDTO dto = client.getRepository(token.accessToken(), githubRepositoryId);
-        System.out.println(dto);
-        return dto;
+        GithubToken token = getToken(userId)
+                .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
+        return client.getRepository(token.accessToken(), githubRepositoryId);
     }
 
     public GithubService(TokenEncryptionService cipher, GithubApiClient client, GithubTokenRepository tokenRepository, ApplicationEventPublisher applicationEventPublisher) {
@@ -43,9 +39,9 @@ import java.util.UUID;
     }
 
     public List<GithubRepositoryDTO> fetchUserRepositories(UUID userId) {
-        System.out.println("Fetching user repositories for " + userId);
-        GithubToken token = getToken(userId);
-        System.out.println("Acquired access token " + token.accessToken());
+        GithubToken token = getToken(userId)
+                .orElseThrow(() -> new GithubCodeTokenExchangeException("Github code token expired"));
+
         return client.fetchUserRepositories(
                 "Bearer " + token.accessToken(),
                 "owner",
@@ -55,14 +51,10 @@ import java.util.UUID;
     }
 
     public Optional<GithubProfileDTO> fetchUserProfile(UUID userId) {
-        return tokenRepository.findById(userId)
-                .map(cipher::decrypt)
-                .map(token -> {
-                    return client.fetchProfile("Bearer " + token.accessToken());
-                });
+        return getToken(userId)
+                .map(token -> client.fetchProfile("Bearer " + token.accessToken()));
     }
 
-    @Async
     @EventListener
     void exchangeToken(GithubExchangeTokenEvent event) {
         GithubTokenDTO dto = client.exchangeCodeForToken(githubClientId, githubClientSecret, event.code());
@@ -77,33 +69,30 @@ import java.util.UUID;
         tokenRepository.save(cipher.encrypt(token));
     }
 
-    @Async
-    @EventListener
-    void refreshToken(GithubRefreshTokenEvent event) {
-        GithubToken token = tokenRepository.findById(event.userId()).orElseThrow(() -> new NoTokenException("no github token found for: " + event.userId()));
-        token = cipher.decrypt(token);
-        validateToken(token);
-        client.refreshToken(githubClientId, githubClientSecret, "refresh_token", token.refreshToken());
-    }
+    GithubToken refreshToken(UUID userId, GithubToken expiredToken) {
+        GithubTokenDTO dto = client.refreshToken(githubClientId, githubClientSecret, "refresh_token", expiredToken.refreshToken());
 
-    private void validateToken(GithubToken token) {
-        if (!token.hasAccessToken()) throw new NoTokenException("no github token found for: " + token.userId());
-        if (!token.validRefreshToken()) throw new NoTokenException("no github token found for: " + token.userId());
-        if (!token.validAccessToken()) {
-            applicationEventPublisher.publishEvent(new GithubRefreshTokenEvent(token.userId(), token.accessToken()));
+        if (dto.error() != null || dto.accessToken() == null) {
+            tokenRepository.deleteById(userId);
+            throw new GithubCodeTokenExchangeException("Github session expired, user must login again");
         }
+
+
+        System.out.println("Github refresh token from client : " + dto);
+        GithubToken token = GithubToken.fromDto(userId, dto);
+        GithubToken savedToken = tokenRepository.update(cipher.encrypt(token));
+        return cipher.decrypt(savedToken);
     }
 
-    private GithubToken getToken(UUID userId) {
-        System.out.println("getting token for " + userId);
-        GithubToken token = tokenRepository.findById(userId).orElse(null);
-        System.out.println("encrypted token " + token.accessToken());
-
-        if (token == null) { return null; }
-
-        token = cipher.decrypt(token);
-        validateToken(token);
-        return token;
+    private Optional<GithubToken> getToken(UUID userId) {
+        return tokenRepository.findById(userId)
+                .map(cipher::decrypt)
+                .map(token -> {
+                    if (!token.validAccessToken()) {
+                        return refreshToken(userId, token);
+                    }
+                    return token;
+                });
     }
 
 }

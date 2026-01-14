@@ -7,4 +7,12 @@ public record AuthUserRequest(
         String email,
         String name
 ) {
+    @Override
+    public String toString() {
+        return "AuthUserRequest{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

@@ -68,6 +68,8 @@ class UserController {
                     jwt.getClaimAsString("name")
             );
 
+            System.out.println(request);
+
             UserDetailsDTO dto = authService.save(request);
 
             return ResponseEntity.ok(dto);

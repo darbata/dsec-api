@@ -15,6 +15,7 @@ public record GithubToken(
         String tokenType
 ) {
     public static GithubToken fromDto(UUID userId, GithubTokenDTO dto) {
+        System.out.println("Github token from dto: " + dto);
         return new GithubToken(
                 userId,
                 dto.accessToken(),
@@ -36,5 +37,18 @@ public record GithubToken(
 
     public boolean validRefreshToken() {
         return OffsetDateTime.now().isBefore(this.refreshTokenExpiryDate);
+    }
+
+    @Override
+    public String toString() {
+        return "GithubToken{" +
+                "userId=" + userId +
+                ", accessToken='" + accessToken + '\'' +
+                ", accessTokenExpiryDate=" + accessTokenExpiryDate +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", refreshTokenExpiryDate=" + refreshTokenExpiryDate +
+                ", scope='" + scope + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                '}';
     }
 }

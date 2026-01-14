@@ -46,5 +46,40 @@ public class GithubTokenRepository {
         return token;
     }
 
+    public GithubToken update(GithubToken token) {
+        String sql = """
+            UPDATE github_tokens SET
+                access_token = :accessToken,
+                access_token_expiry_date = :accessTokenExpiryDate,
+                refresh_token = :refreshToken,
+                refresh_token_expiry_date = :refreshTokenExpiryDate,
+                scope = :scope,
+                token_type = :tokenType
+            WHERE user_id = :userId RETURNING *;
+        """;
+
+        jdbcClient.sql(sql)
+                .param("userId", token.userId())
+                .param("accessToken", token.accessToken())
+                .param("accessTokenExpiryDate", token.accessTokenExpiryDate())
+                .param("refreshToken", token.refreshToken())
+                .param("refreshTokenExpiryDate", token.refreshTokenExpiryDate())
+                .param("scope", token.scope())
+                .param("tokenType", token.tokenType())
+                .query(GithubToken.class)
+                .single();
+
+        return token;
+    }
+
+    public void deleteById(UUID userId) {
+        String sql = """
+            DELETE FROM github_tokens WHERE user_id = :userId;
+        """;
+
+        jdbcClient.sql(sql).param("userId", userId).update();
+    }
+
+
 
 }

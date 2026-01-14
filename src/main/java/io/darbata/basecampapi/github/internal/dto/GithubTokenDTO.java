@@ -7,6 +7,19 @@ public record GithubTokenDTO(String accessToken, Integer expiresIn, String refre
                              Integer refreshTokenExpiresIn, String scope, String tokenType,
                              String error
 ) {
+    @Override
+    public String toString() {
+        return "GithubTokenDTO{" +
+                "accessToken='" + accessToken + '\'' +
+                ", expiresIn=" + expiresIn +
+                ", refreshToken='" + refreshToken + '\'' +
+                ", refreshTokenExpiresIn=" + refreshTokenExpiresIn +
+                ", scope='" + scope + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                ", error='" + error + '\'' +
+                '}';
+    }
+
     @JsonCreator
     public GithubTokenDTO(
             @JsonProperty("access_token") String accessToken,
@@ -24,5 +37,7 @@ public record GithubTokenDTO(String accessToken, Integer expiresIn, String refre
         this.scope = scope;
         this.tokenType = tokenType;
         this.error = error;
+
+
     }
 }
