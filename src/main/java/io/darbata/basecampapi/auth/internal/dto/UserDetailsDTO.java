@@ -6,6 +6,6 @@ import io.darbata.basecampapi.github.GithubProfileDTO;
 import java.util.Optional;
 
 public record UserDetailsDTO(
-        UserDTO userDTO,
-        Optional<GithubProfileDTO> profileDTO
+        UserDTO user,
+        Optional<GithubProfileDTO> githubProfile
 ) { }

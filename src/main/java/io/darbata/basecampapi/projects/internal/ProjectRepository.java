@@ -60,9 +60,9 @@ public class ProjectRepository {
         return project;
     }
 
-    public List<Project> paginatedFetchProjectsSortedByCreated(int pageSize, int pageNum) {
+    public List<Project> getCommunityProjects(int pageSize, int pageNum) {
         String sql = """
-            SELECT * FROM projects ORDER BY created_at LIMIT :pageSize OFFSET :pageNum;
+            SELECT * FROM projects WHERE featured = false ORDER BY created_at LIMIT :pageSize OFFSET :pageNum;
         """;
 
         return jdbcClient.sql(sql)
@@ -70,6 +70,26 @@ public class ProjectRepository {
                 .param("pageSize", pageSize)
                 .query(Project.class)
                 .list();
+    }
+
+    public List<Project> getFeaturedProjects(int pageSize, int pageNum) {
+        String sql = """
+            SELECT * FROM projects WHERE featured = true ORDER BY created_at LIMIT :pageSize OFFSET :pageNum;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("pageNum", pageNum)
+                .param("pageSize", pageSize)
+                .query(Project.class)
+                .list();
+    }
+
+    public void toggleFeatured(String title) {
+        String sql = """
+        UPDATE projects SET featured = NOT featured WHERE title = :title;
+        """;
+
+        jdbcClient.sql(sql).param("title", title).update();
     }
 
 }

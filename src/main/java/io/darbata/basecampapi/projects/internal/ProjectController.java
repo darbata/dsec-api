@@ -21,13 +21,13 @@ public class ProjectController {
     }
 
 
-    @GetMapping("/")
-    ResponseEntity<?> getProjects(
+    @GetMapping("/community")
+    ResponseEntity<?> getCommunityProjects(
             @RequestParam(defaultValue = "20") int pageSize,
             @RequestParam(defaultValue = "0") int pageNum
     ) {
         try {
-            PageDTO<ProjectDTO> dto = projectService.paginatedFetchSortedProjectsByCreated(pageSize, pageNum);
+            PageDTO<ProjectDTO> dto = projectService.getProjects(pageSize, pageNum, false);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -35,6 +35,32 @@ public class ProjectController {
             System.out.println(e.getStackTrace());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/featured")
+    ResponseEntity<?> getFeaturedProjects(
+            @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(defaultValue = "0") int pageNum
+    ) {
+        try {
+            PageDTO<ProjectDTO> dto = projectService.getProjects(pageSize, pageNum, true);
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println(e.getClass());
+            System.out.println(e.getStackTrace());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{title}")
+    ResponseEntity<?> toggleProjectFeatured(@PathVariable String title) {
+        try {
+            projectService.toggleFeatured(title);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{title}")
@@ -50,11 +76,14 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     ResponseEntity<?> createProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateProjectRequest request) {
         try {
+            System.out.println(request);
             UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            System.out.println(userId);
             ProjectDTO dto = projectService.create(userId, request.title(), request.description(), request.repoId());
+            System.out.print(dto.githubRepoId());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.out.println(e.getMessage());

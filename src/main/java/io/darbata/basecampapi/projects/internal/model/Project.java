@@ -11,5 +11,6 @@ public record Project (
     String githubRepoUrl,
     String githubRepoLanguage,
     UUID ownerId,
-    String ownerUsername
+    String ownerUsername,
+    boolean featured
 ) {}

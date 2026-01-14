@@ -1,6 +1,6 @@
 package io.darbata.basecampapi.discussions.internal.model;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record Discussion (
@@ -9,5 +9,5 @@ public record Discussion (
     UUID parentDiscussionId,
     UUID userId,
     String content,
-    LocalDateTime createdAt
+    OffsetDateTime createdAt
 ) { }

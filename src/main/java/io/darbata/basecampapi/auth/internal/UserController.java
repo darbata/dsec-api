@@ -43,8 +43,8 @@ class UserController {
         }
     }
 
-    @GetMapping("/repos")
-    ResponseEntity<?> enableGithubOauth(@AuthenticationPrincipal Jwt jwt) {
+    @GetMapping("/github/repos")
+    ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
         try {
             UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
             List<GithubRepositoryDTO> repos = githubService.fetchUserRepositories(userId);

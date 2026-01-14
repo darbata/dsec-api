@@ -44,26 +44,35 @@ public class ProjectService {
                 repoDto.url(),
                 repoDto.language(),
                 ownerId,
-                profileDTO.githubAvatarUrl()
+                profileDTO.githubUsername(),
+                false
         );
 
         return ProjectDTO.fromEntity(projectRepository.save(project));
     }
 
 
-    public PageDTO<ProjectDTO> paginatedFetchSortedProjectsByCreated(int pageSize, int pageNum) {
-        List<ProjectDTO> projects = projectRepository.paginatedFetchProjectsSortedByCreated(pageSize, pageNum)
-                .stream()
-                .map(ProjectDTO::fromEntity)
-                .toList();
+    public PageDTO<ProjectDTO> getProjects(int pageSize, int pageNum, boolean featured) {
+
+        List<Project> projects = featured
+                ? projectRepository.getFeaturedProjects(pageSize, pageNum)
+                : projectRepository.getCommunityProjects(pageSize, pageNum);
+
+        List<ProjectDTO> content = projects.stream().map(ProjectDTO::fromEntity).toList();
 
         return new PageDTO<>(
-                projects,
+                content,
                 "created_at",
                 true,
                 pageSize,
                 pageNum
         );
     }
+
+    public void toggleFeatured(String title) {
+        projectRepository.toggleFeatured(title);
+    }
+
+
 }
 

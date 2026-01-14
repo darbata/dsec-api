@@ -2,15 +2,15 @@ package io.darbata.basecampapi.github.internal.model;
 
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record GithubToken(
         UUID userId, // maps to oauth user
         String accessToken,
-        LocalDateTime accessTokenExpiryDate,
+        OffsetDateTime accessTokenExpiryDate,
         String refreshToken,
-        LocalDateTime refreshTokenExpiryDate,
+        OffsetDateTime refreshTokenExpiryDate,
         String scope,
         String tokenType
 ) {
@@ -18,9 +18,9 @@ public record GithubToken(
         return new GithubToken(
                 userId,
                 dto.accessToken(),
-                LocalDateTime.now().plusSeconds(dto.expiresIn()),
+                OffsetDateTime.now().plusSeconds(dto.expiresIn()),
                 dto.refreshToken(),
-                LocalDateTime.now().plusSeconds(dto.refreshTokenExpiresIn()),
+                OffsetDateTime.now().plusSeconds(dto.refreshTokenExpiresIn()),
                 dto.scope(),
                 dto.tokenType()
         );
@@ -31,10 +31,10 @@ public record GithubToken(
     }
 
     public boolean validAccessToken() {
-        return LocalDateTime.now().isBefore(this.accessTokenExpiryDate);
+        return OffsetDateTime.now().isBefore(this.accessTokenExpiryDate);
     }
 
     public boolean validRefreshToken() {
-        return LocalDateTime.now().isBefore(this.refreshTokenExpiryDate);
+        return OffsetDateTime.now().isBefore(this.refreshTokenExpiryDate);
     }
 }

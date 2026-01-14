@@ -66,12 +66,14 @@ import java.util.UUID;
     @EventListener
     void exchangeToken(GithubExchangeTokenEvent event) {
         GithubTokenDTO dto = client.exchangeCodeForToken(githubClientId, githubClientSecret, event.code());
+        System.out.println("Github code token: " + dto.accessToken());
 
-        if (dto == null || dto.error() != null) {
+        if (dto.error() != null) {
             throw new GithubCodeTokenExchangeException("Error exchanging code for token for user " + event.userId() + " with error : " + dto == null ? "" : dto.error());
         }
 
         GithubToken token = GithubToken.fromDto(event.userId(), dto);
+        System.out.println("Github token: " + token.accessToken());
         tokenRepository.save(cipher.encrypt(token));
     }
 
