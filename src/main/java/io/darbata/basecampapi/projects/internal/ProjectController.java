@@ -53,7 +53,7 @@ public class ProjectController {
         }
     }
 
-    @PutMapping("/{title}")
+    @PutMapping("/{title}/featured")
     ResponseEntity<?> toggleProjectFeatured(@PathVariable String title) {
         try {
             projectService.toggleFeatured(title);
