@@ -2,6 +2,7 @@ package io.darbata.basecampapi.auth;
 
 public record UserDTO(
         String email,
-        String name
-) {
-}
+        String displayName,
+        String discordDisplayName,
+        String avatarUrl
+) { }
