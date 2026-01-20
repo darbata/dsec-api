@@ -85,6 +85,10 @@ import java.util.UUID;
         return getToken(userId).isPresent();
     }
 
+    public void disconnectGithub(UUID userId) {
+        tokenRepository.deleteById(userId);
+    }
+
     private Optional<GithubToken> getToken(UUID userId) {
         return tokenRepository.findById(userId)
                 .map(cipher::decrypt)

@@ -6,6 +6,8 @@ import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubService;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
@@ -23,9 +25,15 @@ public class AuthService {
                 savedUser.avatarUrl(), githubService.isGithubConnected(savedUser.id()));
     }
 
+    public void disconnectGithub(UUID userId) {
+        githubService.disconnectGithub(userId);
+    }
+
     protected User persistUser(AuthUserRequest request) {
         User user = new User(request.id(), request.email(), request.displayName(),
                 request.discordDisplayName(), request.avatarUrl());
         return repo.save(user);
     }
+
+
 }

@@ -78,5 +78,18 @@ class UserController {
         }
     }
 
+    @DeleteMapping("/github/token")
+    ResponseEntity<?> deleteGithubToken(@AuthenticationPrincipal Jwt jwt) {
+        try {
+            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            authService.disconnectGithub(userId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName());
+            System.err.println("Error registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
 }
