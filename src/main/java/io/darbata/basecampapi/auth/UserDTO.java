@@ -4,5 +4,6 @@ public record UserDTO(
         String email,
         String displayName,
         String discordDisplayName,
-        String avatarUrl
+        String avatarUrl,
+        boolean githubConnected
 ) { }

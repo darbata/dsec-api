@@ -3,21 +3,24 @@ package io.darbata.basecampapi.auth;
 import io.darbata.basecampapi.auth.internal.*;
 import io.darbata.basecampapi.auth.internal.model.User;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
+import io.darbata.basecampapi.github.GithubService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
 
     private final UserRepository repo;
+    private final GithubService githubService;
 
-    AuthService(UserRepository repo) {
+    AuthService(UserRepository repo, GithubService githubService) {
         this.repo = repo;
+        this.githubService = githubService;
     }
 
     public UserDTO save(AuthUserRequest request) {
         User savedUser = persistUser(request);
         return new UserDTO(savedUser.email(), savedUser.displayName(), savedUser.discordDisplayName(),
-                savedUser.avatarUrl());
+                savedUser.avatarUrl(), githubService.isGithubConnected(savedUser.id()));
     }
 
     protected User persistUser(AuthUserRequest request) {
