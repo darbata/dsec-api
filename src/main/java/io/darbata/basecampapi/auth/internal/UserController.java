@@ -62,17 +62,15 @@ class UserController {
     @GetMapping("/auth")
     ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
         try {
-/*            AuthUserRequest request = new AuthUserRequest(
+            AuthUserRequest request = new AuthUserRequest(
                     UUID.fromString(jwt.getClaimAsString("sub")),
                     jwt.getClaimAsString("email"),
-                    jwt.getClaimAsString("name")
-            );*/
-            System.out.println(jwt.getClaimAsString("sub"));
-            System.out.println(jwt);
-
-            // UserDTO dto = authService.save(request);
-            // return ResponseEntity.ok(dto);
-            return ResponseEntity.noContent().build();
+                    jwt.getClaimAsString("preferred_username"),
+                    jwt.getClaimAsString("custom:discord_display_name"), // default null
+                    jwt.getClaimAsString("custom:avatar_url") // default null
+            );
+            UserDTO dto = authService.save(request);
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             System.err.println(e.getClass().getName());
             System.err.println("Error registering user: " + e.getMessage());
