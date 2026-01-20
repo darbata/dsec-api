@@ -1,9 +1,7 @@
 package io.darbata.basecampapi.github.internal;
 
-import io.darbata.basecampapi.github.GithubProfileDTO;
 import io.darbata.basecampapi.github.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
-import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,12 +15,6 @@ import java.util.List;
 @HttpExchange
 @Service
 public interface GithubApiClient {
-
-    @GetExchange(value = "https://api.github.com/user", accept = "application/json")
-    GithubProfileDTO fetchProfile(
-            @RequestHeader("Authorization") String token
-    );
-
     @GetExchange(value = "https://api.github.com/user/repos", accept = "application/json")
     List<GithubRepositoryDTO> fetchUserRepositories(
             @RequestHeader("Authorization") String token,

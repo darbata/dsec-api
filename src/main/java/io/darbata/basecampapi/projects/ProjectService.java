@@ -1,6 +1,7 @@
 package io.darbata.basecampapi.projects;
 
-import io.darbata.basecampapi.github.GithubProfileDTO;
+import io.darbata.basecampapi.auth.UserDTO;
+import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.github.GithubRepositoryDTO;
 import io.darbata.basecampapi.github.GithubService;
 import io.darbata.basecampapi.common.PageDTO;
@@ -16,39 +17,31 @@ import java.util.UUID;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final GithubService githubService;
+    private final UserService userService;
 
-    ProjectService(ProjectRepository repo, GithubService githubService) {
+    ProjectService(ProjectRepository repo, GithubService githubService, UserService userService) {
         this.projectRepository = repo;
         this.githubService = githubService;
+        this.userService = userService;
     }
 
     public ProjectDTO getById(UUID id) {
         Project project = projectRepository.findById(id).orElseThrow();
-        return ProjectDTO.fromEntity(project);
+        UserDTO user = userService.findUserById(project.ownerId());
+        return fromEntity(project, user);
     }
 
     public ProjectDTO getByTitle(String title) {
         Project project = projectRepository.findByTitle(title).orElseThrow();
-        return ProjectDTO.fromEntity(project);
+        UserDTO user = userService.findUserById(project.ownerId());
+        return fromEntity(project, user);
     }
 
     public ProjectDTO create(UUID ownerId, String title, String description, long githubRepoId) {
-        GithubRepositoryDTO repoDto = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
-        GithubProfileDTO profileDTO = githubService.fetchUserProfile(ownerId).orElseThrow();
-        Project project = new Project(
-                null,
-                title,
-                description,
-                repoDto.id(),
-                repoDto.name(),
-                repoDto.url(),
-                repoDto.language(),
-                ownerId,
-                profileDTO.githubUsername(),
-                false
-        );
-
-        return ProjectDTO.fromEntity(projectRepository.save(project));
+        GithubRepositoryDTO repoDTO = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
+        Project project = new Project(null, title, description, false, repoDTO, ownerId);
+        UserDTO user = userService.findUserById(project.ownerId());
+        return fromEntity(project, user);
     }
 
 
@@ -58,7 +51,10 @@ public class ProjectService {
                 ? projectRepository.getFeaturedProjects(pageSize, pageNum)
                 : projectRepository.getCommunityProjects(pageSize, pageNum);
 
-        List<ProjectDTO> content = projects.stream().map(ProjectDTO::fromEntity).toList();
+        List<ProjectDTO> content = projects.stream().map((project) -> {
+            UserDTO user = userService.findUserById(project.ownerId());
+            return fromEntity(project, user);
+        }).toList();
 
         return new PageDTO<>(
                 content,
@@ -71,6 +67,21 @@ public class ProjectService {
 
     public void toggleFeatured(String title) {
         projectRepository.toggleFeatured(title);
+    }
+
+    private ProjectDTO fromEntity(Project project, UserDTO user) {
+        GithubRepositoryDTO repo = new GithubRepositoryDTO(
+                project.repo().id(),
+                project.repo().name(),
+                project.repo().url(),
+                project.repo().language()
+        );
+        return new ProjectDTO(
+                project.title(),
+                project.description(),
+                repo,
+                user
+        );
     }
 
 

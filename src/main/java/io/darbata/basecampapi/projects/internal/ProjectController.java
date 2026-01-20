@@ -79,16 +79,10 @@ public class ProjectController {
     @PostMapping("")
     ResponseEntity<?> createProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateProjectRequest request) {
         try {
-            System.out.println(request);
             UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
-            System.out.println(userId);
             ProjectDTO dto = projectService.create(userId, request.title(), request.description(), request.repoId());
-            System.out.print(dto.githubRepoId());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println(e.getClass());
-            System.out.println(e.getStackTrace());
             return ResponseEntity.badRequest().build();
         }
     }

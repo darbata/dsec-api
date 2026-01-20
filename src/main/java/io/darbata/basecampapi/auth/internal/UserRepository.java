@@ -16,18 +16,6 @@ public class UserRepository {
         this.jdbcClient = jdbcClient;
     }
 
-    public List<User> findAll() {
-
-        String sql = """
-                SELECT * FROM oauth_users;
-        """;
-
-        return jdbcClient.sql(sql)
-                .query(User.class)
-                .list();
-
-    }
-
     public Optional<User> findById(UUID id) {
         String sql = """
             SELECT * FROM oauth_users WHERE id = :id;
@@ -42,21 +30,21 @@ public class UserRepository {
     public User save(User user) {
         String sql = """
         
-                INSERT INTO oauth_users (id, email, name)
-        VALUES (:id, :email, :name)
-        ON CONFLICT (id)
-        DO UPDATE SET
-                      email = EXCLUDED.email,
-                      name =
-                EXCLUDED.name;
-
+            INSERT INTO oauth_users (id, email, display_name, avatar_url)
+            VALUES (:id, :email, :displayName, :avatarUrl)
+            ON CONFLICT (id)
+            DO UPDATE SET
+                  email = EXCLUDED.email,
+                  display_name = EXCLUDED.display_name,
+                  avatar_url = EXCLUDED.avatar_url;
         """;
 
         jdbcClient
                 .sql(sql)
                 .param("id", user.id())
-                .param("name", user.name())
                 .param("email", user.email())
+                .param("displayName", user.displayName())
+                .param("avatarUrl", user.avatarUrl())
                 .update();
 
         return user;
@@ -72,19 +60,5 @@ public class UserRepository {
         jdbcClient.sql(sql)
                 .param("id", id)
                 .update();
-    }
-
-    public User update(User user) {
-                String sql = """
-            UPDATE oauth_users SET name = :name, email = :email WHERE id = :id;
-        """;
-
-        jdbcClient.sql(sql)
-                .param("name", user.name())
-                .param("email", user.email())
-                .param("id", user.id())
-                .update();
-
-        return user;
     }
 }

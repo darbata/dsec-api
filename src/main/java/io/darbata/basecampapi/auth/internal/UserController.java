@@ -1,7 +1,7 @@
 package io.darbata.basecampapi.auth.internal;
 
 import io.darbata.basecampapi.auth.AuthService;
-import io.darbata.basecampapi.auth.internal.dto.UserDetailsDTO;
+import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
 import io.darbata.basecampapi.github.GithubRepositoryDTO;
@@ -62,17 +62,17 @@ class UserController {
     @GetMapping("/auth")
     ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
         try {
-            AuthUserRequest request = new AuthUserRequest(
+/*            AuthUserRequest request = new AuthUserRequest(
                     UUID.fromString(jwt.getClaimAsString("sub")),
                     jwt.getClaimAsString("email"),
                     jwt.getClaimAsString("name")
-            );
+            );*/
+            System.out.println(jwt.getClaimAsString("sub"));
+            System.out.println(jwt);
 
-            System.out.println(request);
-
-            UserDetailsDTO dto = authService.save(request);
-
-            return ResponseEntity.ok(dto);
+            // UserDTO dto = authService.save(request);
+            // return ResponseEntity.ok(dto);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             System.err.println(e.getClass().getName());
             System.err.println("Error registering user: " + e.getMessage());

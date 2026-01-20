@@ -40,21 +40,20 @@ public class ProjectRepository {
 
     public Project save(Project project) {
         String sql = """
-            INSERT INTO projects (title, description, github_repo_id, github_repo_name, 
-            github_repo_url, github_repo_language, owner_id, owner_username)
-            VALUES (:title, :description, :githubRepoId, :githubRepoName, 
-            :githubRepoUrl, :githubRepoLanguage, :ownerId, :ownerUsername);
+            INSERT INTO projects (title, description, github_repo_id, github_repo_name,
+            github_repo_url, github_repo_language, owner_id)
+            VALUES (:title, :description, :githubRepoId, :githubRepoName,
+            :githubRepoUrl, :githubRepoLanguage, :ownerId);
         """;
 
         jdbcClient.sql(sql)
             .param("title", project.title())
             .param("description", project.description())
-            .param("githubRepoId", project.githubRepoId())
-            .param("githubRepoName", project.githubRepoName())
-            .param("githubRepoUrl", project.githubRepoUrl())
-            .param("githubRepoLanguage", project.githubRepoLanguage())
+            .param("githubRepoId", project.repo().id())
+            .param("githubRepoName", project.repo().name())
+            .param("githubRepoUrl", project.repo().url())
+            .param("githubRepoLanguage", project.repo().language())
             .param("ownerId", project.ownerId())
-            .param("ownerUsername", project.ownerUsername())
             .update();
 
         return project;

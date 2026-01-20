@@ -25,11 +25,7 @@ import java.util.UUID;
     private final GithubApiClient client;
     private final GithubTokenRepository tokenRepository;
 
-    public GithubRepositoryDTO fetchGithubRepositoryById(UUID userId, long githubRepositoryId) {
-        GithubToken token = getToken(userId)
-                .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
-        return client.getRepository(token.accessToken(), githubRepositoryId);
-    }
+
 
     public GithubService(TokenEncryptionService cipher, GithubApiClient client, GithubTokenRepository tokenRepository, ApplicationEventPublisher applicationEventPublisher) {
         this.cipher = cipher;
@@ -50,9 +46,10 @@ import java.util.UUID;
         );
     }
 
-    public Optional<GithubProfileDTO> fetchUserProfile(UUID userId) {
-        return getToken(userId)
-                .map(token -> client.fetchProfile("Bearer " + token.accessToken()));
+    public GithubRepositoryDTO fetchGithubRepositoryById(UUID userId, long githubRepositoryId) {
+        GithubToken token = getToken(userId)
+                .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
+        return client.getRepository(token.accessToken(), githubRepositoryId);
     }
 
     @EventListener

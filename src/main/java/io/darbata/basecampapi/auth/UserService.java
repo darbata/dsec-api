@@ -18,6 +18,6 @@ public class UserService {
     public UserDTO findUserById(UUID id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) return null;
-        return new UserDTO(user.email(), user.name());
+        return null;
     }
 }
