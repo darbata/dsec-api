@@ -49,10 +49,10 @@ public class ProjectRepository {
         jdbcClient.sql(sql)
             .param("title", project.title())
             .param("description", project.description())
-            .param("githubRepoId", project.repo().id())
-            .param("githubRepoName", project.repo().name())
-            .param("githubRepoUrl", project.repo().url())
-            .param("githubRepoLanguage", project.repo().language())
+            .param("githubRepoId", project.githubRepoId())
+            .param("githubRepoName", project.githubRepoName())
+            .param("githubRepoUrl", project.githubRepoUrl())
+            .param("githubRepoLanguage", project.githubRepoLanguage())
             .param("ownerId", project.ownerId())
             .update();
 

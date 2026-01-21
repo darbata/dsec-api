@@ -30,9 +30,6 @@ public class ProjectController {
             PageDTO<ProjectDTO> dto = projectService.getProjects(pageSize, pageNum, false);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println(e.getClass());
-            System.out.println(e.getStackTrace());
             return ResponseEntity.badRequest().build();
         }
     }

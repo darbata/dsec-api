@@ -62,8 +62,9 @@ class UserController {
     @GetMapping("/auth")
     ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
         try {
+            System.out.println(jwt.getClaimAsString("sub"));
             AuthUserRequest request = new AuthUserRequest(
-                    UUID.fromString(jwt.getClaimAsString("sub")),
+                    UUID.fromString(jwt.getClaimAsString("sub").trim()),
                     jwt.getClaimAsString("email"),
                     jwt.getClaimAsString("preferred_username"),
                     jwt.getClaimAsString("custom:discord_display_name"), // default null

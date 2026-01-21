@@ -3,8 +3,6 @@ package io.darbata.basecampapi.auth.internal;
 import io.darbata.basecampapi.auth.internal.model.User;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,12 +28,13 @@ public class UserRepository {
     public User save(User user) {
         String sql = """
         
-            INSERT INTO oauth_users (id, email, display_name, avatar_url)
-            VALUES (:id, :email, :displayName, :avatarUrl)
+            INSERT INTO oauth_users (id, email, display_name, discord_display_name, avatar_url)
+            VALUES (:id, :email, :displayName, :discordDisplayName, :avatarUrl)
             ON CONFLICT (id)
             DO UPDATE SET
                   email = EXCLUDED.email,
                   display_name = EXCLUDED.display_name,
+                  discord_display_name = EXCLUDED.discord_display_name,
                   avatar_url = EXCLUDED.avatar_url;
         """;
 
@@ -44,6 +43,7 @@ public class UserRepository {
                 .param("id", user.id())
                 .param("email", user.email())
                 .param("displayName", user.displayName())
+                .param("discordDisplayName", user.discordDisplayName())
                 .param("avatarUrl", user.avatarUrl())
                 .update();
 

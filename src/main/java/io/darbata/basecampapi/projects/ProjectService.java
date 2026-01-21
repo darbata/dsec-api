@@ -39,7 +39,8 @@ public class ProjectService {
 
     public ProjectDTO create(UUID ownerId, String title, String description, long githubRepoId) {
         GithubRepositoryDTO repoDTO = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
-        Project project = new Project(null, title, description, false, repoDTO, ownerId);
+        Project project = new Project(null, title, description, false, repoDTO.id(), repoDTO.name(),
+                repoDTO.url(), repoDTO.language(), ownerId, null);
         UserDTO user = userService.findUserById(project.ownerId());
         return fromEntity(project, user);
     }
@@ -71,16 +72,17 @@ public class ProjectService {
 
     private ProjectDTO fromEntity(Project project, UserDTO user) {
         GithubRepositoryDTO repo = new GithubRepositoryDTO(
-                project.repo().id(),
-                project.repo().name(),
-                project.repo().url(),
-                project.repo().language()
+                project.githubRepoId(),
+                project.githubRepoName(),
+                project.githubRepoUrl(),
+                project.githubRepoLanguage()
         );
         return new ProjectDTO(
                 project.title(),
                 project.description(),
                 repo,
-                user
+                user.displayName(),
+                user.avatarUrl()
         );
     }
 
