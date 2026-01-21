@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 public record DiscussionDTO (
+    UUID id,
     UUID parentDiscussionId,
     UserDTO user,
     String content,

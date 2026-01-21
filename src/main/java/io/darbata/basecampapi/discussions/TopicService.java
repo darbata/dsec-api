@@ -64,6 +64,7 @@ public class TopicService {
 
             UserDTO user  = userService.findUserById(discussion.userId());
             discussionDtos.add(new DiscussionDTO(
+                    discussion.id(),
                     null,
                     user,
                     discussion.content(),
@@ -93,6 +94,7 @@ public class TopicService {
             UserDTO user = userService.findUserById(discussion.userId());
 
             dtos.add(new DiscussionDTO(
+                    discussion.id(),
                     discussion.parentDiscussionId(),
                     user,
                     discussion.content(),
@@ -100,7 +102,6 @@ public class TopicService {
                     discussion.createdAt()
             ));
         }
-
         return dtos;
     }
 
@@ -111,7 +112,8 @@ public class TopicService {
                 new Discussion(null, unitTopic.id(), parentDiscussionId, userId, content, null));
 
         UserDTO user = userService.findUserById(discussion.userId());
-        return new DiscussionDTO(discussion.parentDiscussionId(), user, content, new ArrayList<>(), discussion.createdAt());
+        return new DiscussionDTO(discussion.id(), discussion.parentDiscussionId(), user, content,
+                new ArrayList<>(), discussion.createdAt());
     }
 
     public DiscussionDTO createDiscussion(UUID topicId, UUID parentDiscussionId, String userId, String content) {
@@ -119,7 +121,8 @@ public class TopicService {
                 new Discussion(null, topicId, parentDiscussionId, userId, content, null));
 
         UserDTO user = userService.findUserById(discussion.userId());
-        return new DiscussionDTO(discussion.parentDiscussionId(), user, content, new ArrayList<>(), discussion.createdAt());
+        return new DiscussionDTO(discussion.id(), discussion.parentDiscussionId(), user, content,
+                new ArrayList<>(), discussion.createdAt());
     }
 
 }
