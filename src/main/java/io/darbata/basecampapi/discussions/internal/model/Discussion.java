@@ -7,7 +7,7 @@ public record Discussion (
     UUID id,
     UUID topicId,
     UUID parentDiscussionId,
-    UUID userId,
+    String userId,
     String content,
     OffsetDateTime createdAt
 ) { }

@@ -18,7 +18,7 @@ public class UserService {
         this.githubService = githubService;
     }
 
-    public UserDTO findUserById(UUID id) {
+    public UserDTO findUserById(String id) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) return null;
         boolean githubConnected = githubService.isGithubConnected(user.id());

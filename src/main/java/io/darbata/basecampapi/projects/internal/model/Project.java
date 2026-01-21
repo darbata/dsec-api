@@ -14,6 +14,6 @@ public record Project (
     String githubRepoName,
     String githubRepoUrl,
     String githubRepoLanguage,
-    UUID ownerId,
+    String ownerId,
     OffsetDateTime createdAt
 ) {}

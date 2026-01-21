@@ -14,7 +14,7 @@ public class UserRepository {
         this.jdbcClient = jdbcClient;
     }
 
-    public Optional<User> findById(UUID id) {
+    public Optional<User> findById(String id) {
         String sql = """
             SELECT * FROM oauth_users WHERE id = :id;
         """;

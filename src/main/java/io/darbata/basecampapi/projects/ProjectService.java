@@ -37,7 +37,7 @@ public class ProjectService {
         return fromEntity(project, user);
     }
 
-    public ProjectDTO create(UUID ownerId, String title, String description, long githubRepoId) {
+    public ProjectDTO create(String ownerId, String title, String description, long githubRepoId) {
         GithubRepositoryDTO repoDTO = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
         Project project = new Project(null, title, description, false, repoDTO.id(), repoDTO.name(),
                 repoDTO.url(), repoDTO.language(), ownerId, null);

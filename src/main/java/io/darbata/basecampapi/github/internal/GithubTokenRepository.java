@@ -16,7 +16,7 @@ public class GithubTokenRepository {
     }
 
 
-    public Optional<GithubToken> findById(UUID userId) {
+    public Optional<GithubToken> findById(String userId) {
         String sql = """
             SELECT * FROM github_tokens WHERE user_id = :userId;
         """;
@@ -72,7 +72,7 @@ public class GithubTokenRepository {
         return token;
     }
 
-    public void deleteById(UUID userId) {
+    public void deleteById(String userId) {
         String sql = """
             DELETE FROM github_tokens WHERE user_id = :userId;
         """;

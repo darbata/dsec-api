@@ -25,7 +25,7 @@ public class AuthService {
                 savedUser.avatarUrl(), githubService.isGithubConnected(savedUser.id()));
     }
 
-    public void disconnectGithub(UUID userId) {
+    public void disconnectGithub(String userId) {
         githubService.disconnectGithub(userId);
     }
 

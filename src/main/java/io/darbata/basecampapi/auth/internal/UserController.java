@@ -33,7 +33,7 @@ class UserController {
     @PostMapping("/github/oauth")
     ResponseEntity<?> enableGithubOauth(@AuthenticationPrincipal Jwt jwt, @RequestParam String code) {
         try {
-            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            String userId = jwt.getClaimAsString("sub");
             publisher.publishEvent(new GithubExchangeTokenEvent(userId, code));
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
@@ -46,7 +46,7 @@ class UserController {
     @GetMapping("/github/repos")
     ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
         try {
-            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            String userId = jwt.getClaimAsString("sub");
             List<GithubRepositoryDTO> repos = githubService.fetchUserRepositories(userId);
             return ResponseEntity.ok(repos);
         } catch (Exception e) {
@@ -62,9 +62,8 @@ class UserController {
     @GetMapping("/auth")
     ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
         try {
-            System.out.println(jwt.getClaimAsString("sub"));
             AuthUserRequest request = new AuthUserRequest(
-                    UUID.fromString(jwt.getClaimAsString("sub").trim()),
+                    jwt.getClaimAsString("sub"),
                     jwt.getClaimAsString("email"),
                     jwt.getClaimAsString("preferred_username"),
                     jwt.getClaimAsString("custom:discord_display_name"), // default null
@@ -82,7 +81,7 @@ class UserController {
     @DeleteMapping("/github/token")
     ResponseEntity<?> deleteGithubToken(@AuthenticationPrincipal Jwt jwt) {
         try {
-            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            String userId = jwt.getClaimAsString("sub");
             authService.disconnectGithub(userId);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {

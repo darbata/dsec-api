@@ -76,7 +76,7 @@ public class ProjectController {
     @PostMapping("")
     ResponseEntity<?> createProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateProjectRequest request) {
         try {
-            UUID userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            String userId = (jwt.getClaimAsString("sub"));
             ProjectDTO dto = projectService.create(userId, request.title(), request.description(), request.repoId());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {

@@ -34,7 +34,7 @@ import java.util.UUID;
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public List<GithubRepositoryDTO> fetchUserRepositories(UUID userId) {
+    public List<GithubRepositoryDTO> fetchUserRepositories(String userId) {
         GithubToken token = getToken(userId)
                 .orElseThrow(() -> new GithubCodeTokenExchangeException("Github code token expired"));
 
@@ -46,7 +46,7 @@ import java.util.UUID;
         );
     }
 
-    public GithubRepositoryDTO fetchGithubRepositoryById(UUID userId, long githubRepositoryId) {
+    public GithubRepositoryDTO fetchGithubRepositoryById(String userId, long githubRepositoryId) {
         GithubToken token = getToken(userId)
                 .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
         return client.getRepository(token.accessToken(), githubRepositoryId);
@@ -66,7 +66,7 @@ import java.util.UUID;
         tokenRepository.save(cipher.encrypt(token));
     }
 
-    GithubToken refreshToken(UUID userId, GithubToken expiredToken) {
+    GithubToken refreshToken(String userId, GithubToken expiredToken) {
         GithubTokenDTO dto = client.refreshToken(githubClientId, githubClientSecret, "refresh_token", expiredToken.refreshToken());
 
         if (dto.error() != null || dto.accessToken() == null) {
@@ -81,15 +81,15 @@ import java.util.UUID;
         return cipher.decrypt(savedToken);
     }
 
-    public boolean isGithubConnected(UUID userId) {
+    public boolean isGithubConnected(String userId) {
         return getToken(userId).isPresent();
     }
 
-    public void disconnectGithub(UUID userId) {
+    public void disconnectGithub(String userId) {
         tokenRepository.deleteById(userId);
     }
 
-    private Optional<GithubToken> getToken(UUID userId) {
+    private Optional<GithubToken> getToken(String userId) {
         return tokenRepository.findById(userId)
                 .map(cipher::decrypt)
                 .map(token -> {

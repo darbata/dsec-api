@@ -3,10 +3,9 @@ package io.darbata.basecampapi.github.internal.model;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 public record GithubToken(
-        UUID userId, // maps to oauth user
+        String userId, // maps to oauth user
         String accessToken,
         OffsetDateTime accessTokenExpiryDate,
         String refreshToken,
@@ -14,7 +13,7 @@ public record GithubToken(
         String scope,
         String tokenType
 ) {
-    public static GithubToken fromDto(UUID userId, GithubTokenDTO dto) {
+    public static GithubToken fromDto(String userId, GithubTokenDTO dto) {
         System.out.println("Github token from dto: " + dto);
         return new GithubToken(
                 userId,

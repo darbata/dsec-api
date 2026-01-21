@@ -69,8 +69,7 @@ class TopicController {
             @AuthenticationPrincipal Jwt jwt, @PathVariable String unit, @RequestBody CreateTopicDiscussionRequest request)
     {
         try {
-            UUID userId;
-            userId = UUID.fromString(jwt.getClaimAsString("sub"));
+            String userId = jwt.getClaimAsString("sub");
             DiscussionDTO dto = topicService.createUnitTopicDiscussion(
                     unit, request.parentDiscussionId(), userId, request.content());
             return  ResponseEntity.ok(dto);
