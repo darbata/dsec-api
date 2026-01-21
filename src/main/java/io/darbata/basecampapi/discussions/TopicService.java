@@ -21,8 +21,7 @@ public class TopicService {
 
     public TopicService(TopicRepository topicRepository, UserService userService) {
         this.topicRepository = topicRepository;
-        this.userService = userService;
-    }
+        this.userService = userService; }
 
     public UnitTopicDTO createUnitTopic(String unitCode, String unitSiteUrl, String description) {
         UnitTopic topic = topicRepository.createUnitTopic(new UnitTopic(null, unitCode, unitSiteUrl, description));
@@ -35,74 +34,42 @@ public class TopicService {
         return new PageDTO<>(topics, sortCol, true, pageSize, pageNumber);
     }
 
-    // get the unit topic full details as well as hierarchical discussions object
-    public UnitTopicDetailsDTO getUnitTopicDetailsByUnitCode(String unitCode) {
 
+    public UnitTopicDetailsDTO getUnitTopicDetailsWithRootDiscussions(String unitCode) {
         UnitTopic unitTopic = topicRepository.getUnitTopicByUnitCode(unitCode);
-        List<Discussion> discussions = topicRepository.getTopicDiscussions(unitTopic.id());
-
-        Map<UUID, List<Discussion>> map = new HashMap<>();
-
-        // get all unique keys
-        for (Discussion discussion : discussions) {
-            if (!map.containsKey(discussion.id())) {
-                map.put(discussion.id(), new ArrayList<>());
-            }
-        }
-
-        // push all children discussions under them
-        for (Discussion discussion : discussions) {
-            if (discussion.parentDiscussionId() != null) {
-                map.get(discussion.parentDiscussionId()).add(discussion);
-            }
-        }
-
-        List<DiscussionDTO> discussionDtos = new ArrayList<>();
-
-        for (Discussion discussion : discussions) {
-            if (discussion.parentDiscussionId() != null) continue;
-
-            UserDTO user  = userService.findUserById(discussion.userId());
-            discussionDtos.add(new DiscussionDTO(
-                    discussion.id(),
-                    null,
-                    user,
-                    discussion.content(),
-                    getHierarchicalDiscussions(map, discussion.id()),
-                    discussion.createdAt()
-            ));
-        }
-
-        UnitTopicDTO unitTopicDTO = new UnitTopicDTO(
-                unitTopic.unitCode(),
-                unitTopic.unitSiteUrl(),
-                unitTopic.description()
-        );
-
-        return new UnitTopicDetailsDTO(
-                unitTopicDTO,
-                discussionDtos
-        );
+        List<DiscussionDTO> discussions = topicRepository.getRootDiscussionsByUnitCode(unitCode)
+            .stream()
+            .map((discussion) -> {
+            UserDTO user = userService.findUserById(discussion.userId());
+            return DiscussionDTO.fromEntity(user, discussion);
+        }).toList();
+        return new UnitTopicDetailsDTO(UnitTopicDTO.fromEntity(unitTopic), discussions);
     }
 
-    private ArrayList<DiscussionDTO> getHierarchicalDiscussions (Map<UUID, List<Discussion>> map, UUID parentDiscussionId) {
-        if (map.get(parentDiscussionId).isEmpty()) return null;
+    // get the unit topic full details as well as hierarchical discussions object
+    public DiscussionThreadDTO getDiscussionThread(UUID discussionId) {
+        Discussion rootDiscussion = topicRepository.getDiscussionById(discussionId);
+        List<Discussion> comments = topicRepository.getComments(rootDiscussion.id());
 
-        ArrayList<DiscussionDTO> dtos = new ArrayList<>();
+        Map<UUID, DiscussionDTO> map = new HashMap<>();
 
-        for (Discussion discussion : map.get(parentDiscussionId)) {
-            UserDTO user = userService.findUserById(discussion.userId());
+        comments.forEach(comment -> {
+            UserDTO user = userService.findUserById(comment.userId());
+            map.put(comment.id(), DiscussionDTO.fromEntity(user, comment));
+        });
 
-            dtos.add(new DiscussionDTO(
-                    discussion.id(),
-                    discussion.parentDiscussionId(),
-                    user,
-                    discussion.content(),
-                    getHierarchicalDiscussions(map, discussion.id()),
-                    discussion.createdAt()
-            ));
+        UserDTO rootUser = userService.findUserById(rootDiscussion.userId());
+        DiscussionDTO rootDto = DiscussionDTO.fromEntity(rootUser, rootDiscussion);
+        map.put(rootDto.id(), rootDto);
+
+        for (Discussion comment : comments) {
+            DiscussionDTO child = map.get(comment.id());
+            DiscussionDTO parent = map.get(comment.parentDiscussionId());
+            if (parent != null) {
+                parent.discussions().add(child);
+            }
         }
-        return dtos;
+        return new DiscussionThreadDTO(rootDto);
     }
 
     public DiscussionDTO createUnitTopicDiscussion(String unitCode, UUID parentDiscussionId, String userId, String content) {
@@ -124,6 +91,8 @@ public class TopicService {
         return new DiscussionDTO(discussion.id(), discussion.parentDiscussionId(), user, content,
                 new ArrayList<>(), discussion.createdAt());
     }
+
+
 
 }
 

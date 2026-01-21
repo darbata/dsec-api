@@ -1,5 +1,6 @@
 package io.darbata.basecampapi.discussions.internal;
 
+import io.darbata.basecampapi.discussions.internal.dto.DiscussionDTO;
 import io.darbata.basecampapi.discussions.internal.model.Discussion;
 import io.darbata.basecampapi.discussions.internal.model.UnitTopic;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -96,6 +97,41 @@ public class TopicRepository {
 
         return jdbcClient.sql(sql)
                 .param("topicId", topicId)
+                .query(Discussion.class)
+                .list();
+    }
+
+    public Discussion getDiscussionById(UUID discussionId) {
+        String sql = """
+            SELECT * FROM discussions WHERE id = :discussionId;
+            """;
+
+        return jdbcClient.sql(sql)
+                .param("discussionId", discussionId)
+                .query(Discussion.class)
+                .single();
+    }
+
+    public List<Discussion> getComments(UUID discussionId) {
+        String sql = """
+            SELECT * FROM discussions WHERE parent_discussion_id = :discussionId;
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("discussionId", discussionId)
+                .query(Discussion.class)
+                .list();
+    }
+
+    public List<Discussion> getRootDiscussionsByUnitCode(String unitCode) {
+        String sql = """
+            SELECT d.* FROM discussions d
+            WHERE d.parent_discussion_id IS NULL
+            AND d.topic_id IN (SELECT id FROM unit_topics WHERE unit_code = :unitCode)
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("unitCode", unitCode)
                 .query(Discussion.class)
                 .list();
     }

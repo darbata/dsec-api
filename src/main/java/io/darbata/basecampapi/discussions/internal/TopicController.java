@@ -1,6 +1,7 @@
 package io.darbata.basecampapi.discussions.internal;
 
 import io.darbata.basecampapi.common.PageDTO;
+import io.darbata.basecampapi.discussions.DiscussionThreadDTO;
 import io.darbata.basecampapi.discussions.TopicService;
 import io.darbata.basecampapi.discussions.internal.dto.DiscussionDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDTO;
@@ -9,13 +10,14 @@ import io.darbata.basecampapi.discussions.internal.request.CreateTopicDiscussion
 import io.darbata.basecampapi.discussions.internal.request.CreateUnitTopicRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/discussions")
+@RequestMapping("/api/topics")
 class TopicController {
 
     private final TopicService topicService;
@@ -28,11 +30,21 @@ class TopicController {
     public ResponseEntity<?> getTopicDetails(@PathVariable String unitCode) {
         // accept unit code
         try {
-            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetailsByUnitCode(unitCode);
+            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetailsWithRootDiscussions(unitCode);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/discussions/{discussionId}")
+    public ResponseEntity<?> getDiscussionThread(@PathVariable UUID discussionId) {
+        try {
+            DiscussionThreadDTO dto = topicService.getDiscussionThread(discussionId);
+            return ResponseEntity.ok(dto);
+        }  catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
     }
