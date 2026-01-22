@@ -3,6 +3,7 @@ package io.darbata.basecampapi.github;
 import io.darbata.basecampapi.github.internal.*;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 import io.darbata.basecampapi.github.internal.exception.GithubCodeTokenExchangeException;
+import io.darbata.basecampapi.github.internal.model.GithubRepository;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
@@ -49,7 +50,8 @@ import java.util.UUID;
     public GithubRepositoryDTO fetchGithubRepositoryById(String userId, long githubRepositoryId) {
         GithubToken token = getToken(userId)
                 .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
-        return client.getRepository(token.accessToken(), githubRepositoryId);
+        GithubRepository repo = client.getRepository(token.accessToken(), githubRepositoryId);
+        return new GithubRepositoryDTO(repo.id(), repo.name(), repo.url(), repo.language());
     }
 
     @EventListener

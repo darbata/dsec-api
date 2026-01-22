@@ -38,7 +38,6 @@ public class ProjectService {
     }
 
     public ProjectDTO create(String ownerId, String title, String description, long githubRepoId) {
-        System.out.println("[ProjectService.create] ownerId: " + ownerId + " title: " + title + " description: " + description);
         GithubRepositoryDTO repoDTO = githubService.fetchGithubRepositoryById(ownerId, githubRepoId);
         Project project = new Project(null, title, description, false, repoDTO.id(), repoDTO.name(),
                 repoDTO.url(), repoDTO.language(), ownerId, null);

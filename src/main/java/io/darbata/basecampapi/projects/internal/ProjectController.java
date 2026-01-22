@@ -78,6 +78,7 @@ public class ProjectController {
         try {
             String userId = (jwt.getClaimAsString("sub"));
             ProjectDTO dto = projectService.create(userId, request.title(), request.description(), request.repoId());
+            System.out.println(dto.repo());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
