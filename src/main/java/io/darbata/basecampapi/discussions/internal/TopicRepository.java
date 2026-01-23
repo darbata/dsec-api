@@ -55,7 +55,7 @@ public class TopicRepository {
     public Discussion createDiscussion(Discussion discussion) {
         String sql = """
             INSERT INTO discussions (topic_id, parent_discussion_id, user_id, content)
-            VALUES (:topicId, :parentDiscussionId, :userId, :content) RETURNING (id, topic_id, parent_discussion_id, user_id, content, created_at);
+            VALUES (:topicId, :parentDiscussionId, :userId, :content) RETURNING id, topic_id, parent_discussion_id, user_id, content, created_at;
         """;
 
         return jdbcClient
@@ -114,7 +114,13 @@ public class TopicRepository {
 
     public List<Discussion> getComments(UUID discussionId) {
         String sql = """
-            SELECT * FROM discussions WHERE parent_discussion_id = :discussionId;
+            WITH RECURSIVE discussion_tree AS (
+            SELECT * FROM discussions WHERE id = :discussionId
+            UNION ALL
+            SELECT d.* FROM discussions d
+            INNER JOIN discussion_tree dt ON d.parent_discussion_id = dt.id
+            )
+            SELECT * FROM discussion_tree WHERE id != :discussionId;
         """;
 
         return jdbcClient.sql(sql)
