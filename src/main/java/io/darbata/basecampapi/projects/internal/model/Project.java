@@ -1,19 +1,18 @@
 package io.darbata.basecampapi.projects.internal.model;
 
-import io.darbata.basecampapi.github.GithubRepositoryDTO;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+// TODO: make a factory function
+// TODO: convert to class
 public record Project (
     UUID id, // auto gen this
-    String title, // unique
-    String description,
     boolean featured,
-    long githubRepoId,
-    String githubRepoName,
-    String githubRepoUrl,
-    String githubRepoLanguage,
-    String ownerId,
-    OffsetDateTime createdAt
+    String title,
+    String tagline,
+    String description,
+    String bannerUrl,
+    OffsetDateTime createdAt,
+    String ownerId, // system if created by DSEC
+    long repoId
 ) {}

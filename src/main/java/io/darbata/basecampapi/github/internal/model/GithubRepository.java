@@ -2,9 +2,31 @@ package io.darbata.basecampapi.github.internal.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Date;
+
+// taken directly from Github repo
+// map json from Github API to fields in this
 public record GithubRepository (
         @JsonProperty("id") long id,
         @JsonProperty("full_name") String name,
         @JsonProperty("html_url") String url,
-        @JsonProperty("language") String language
-) {}
+        @JsonProperty("language") String language,
+        @JsonProperty("open_issues_count") int openTickets,
+        @JsonProperty("subscribers_count") int contributors,
+        @JsonProperty("stargazers_count") int stars,
+        @JsonProperty("pushed_at") Date pushedAt
+) {
+    @Override
+    public String toString() {
+        return "GithubRepository{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                ", language='" + language + '\'' +
+                ", openTickets=" + openTickets +
+                ", contributors=" + contributors +
+                ", stars=" + stars +
+                ", pushedAt=" + pushedAt +
+                '}';
+    }
+}

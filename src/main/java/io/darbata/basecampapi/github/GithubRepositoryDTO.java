@@ -2,11 +2,17 @@ package io.darbata.basecampapi.github;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Date;
+
 public record GithubRepositoryDTO (
         long id,
         String name,
         String url,
-        String language
+        String language,
+        int openTickets,
+        int contributors,
+        int stars,
+        Date pushedAt
 ) {
     @Override
     public String toString() {
@@ -15,6 +21,10 @@ public record GithubRepositoryDTO (
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
                 ", language='" + language + '\'' +
+                ", openTickets=" + openTickets +
+                ", contributors=" + contributors +
+                ", stars=" + stars +
+                ", pushedAt=" + pushedAt +
                 '}';
     }
 }

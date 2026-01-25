@@ -51,7 +51,8 @@ import java.util.UUID;
         GithubToken token = getToken(userId)
                 .orElseThrow(() -> new NoTokenException("No token found for user " + userId));
         GithubRepository repo = client.getRepository(token.accessToken(), githubRepositoryId);
-        return new GithubRepositoryDTO(repo.id(), repo.name(), repo.url(), repo.language());
+        return new GithubRepositoryDTO(repo.id(), repo.name(), repo.url(), repo.language(), repo.openTickets(),
+            repo.contributors(), repo.stars(), repo.pushedAt());
     }
 
     @EventListener

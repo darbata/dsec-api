@@ -3,13 +3,13 @@ package io.darbata.basecampapi.projects.internal;
 import io.darbata.basecampapi.projects.ProjectService;
 import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.projects.internal.dto.ProjectDTO;
-import io.darbata.basecampapi.projects.internal.request.CreateProjectRequest;
+import io.darbata.basecampapi.projects.internal.model.FeaturedProjectDTO;
+import io.darbata.basecampapi.projects.internal.request.CreateCommunityProjectRequest;
+import io.darbata.basecampapi.projects.internal.request.CreateFeaturedProjectRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -50,16 +50,6 @@ public class ProjectController {
         }
     }
 
-    @PutMapping("/{title}/featured")
-    ResponseEntity<?> toggleProjectFeatured(@PathVariable String title) {
-        try {
-            projectService.toggleFeatured(title);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/{title}")
     ResponseEntity<?> getProjectDetailsByTitle(@PathVariable String title) {
         try {
@@ -73,8 +63,8 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("")
-    ResponseEntity<?> createProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateProjectRequest request) {
+    @PostMapping("/community")
+    ResponseEntity<?> createCommunityProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateCommunityProjectRequest request) {
         try {
             String userId = (jwt.getClaimAsString("sub"));
             ProjectDTO dto = projectService.create(userId, request.title(), request.description(), request.repoId());
@@ -84,6 +74,19 @@ public class ProjectController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/featured")
+    ResponseEntity<?> createFeaturedProject(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody CreateFeaturedProjectRequest request
+    ) {
+        try {
+            FeaturedProjectDTO dto = projectService.createFeaturedProject();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
 
 }

@@ -27,39 +27,25 @@ public class ProjectRepository {
                 .optional();
     }
 
-    public Optional<Project> findByTitle(String title) {
-        String sql = """
-            SELECT * FROM projects WHERE title = :title;
-        """;
-
-        return jdbcClient.sql(sql)
-                .param("title", title)
-                .query(Project.class)
-                .optional();
-    }
-
     public Project save(Project project) {
         String sql = """
-            INSERT INTO projects (title, description, github_repo_id, github_repo_name,
-            github_repo_url, github_repo_language, owner_id)
-            VALUES (:title, :description, :githubRepoId, :githubRepoName,
-            :githubRepoUrl, :githubRepoLanguage, :ownerId);
+            INSERT INTO projects (title, description, tagline, banner_url, owner_id, repo_id)
+            VALUES (:title, :description, :tagline, :bannerUrl, :ownerId, :repoId);
         """;
 
         jdbcClient.sql(sql)
-            .param("title", project.title())
-            .param("description", project.description())
-            .param("githubRepoId", project.githubRepoId())
-            .param("githubRepoName", project.githubRepoName())
-            .param("githubRepoUrl", project.githubRepoUrl())
-            .param("githubRepoLanguage", project.githubRepoLanguage())
-            .param("ownerId", project.ownerId())
+                .param("title", project.title())
+                .param("description", project.description())
+                .param("tagline", project.tagline())
+                .param("bannerUrl", project.bannerUrl())
+                .param("ownerId", project.ownerId())
+                .param("repoId", project.repoId())
             .update();
 
         return project;
     }
 
-    public List<Project> getCommunityProjects(int pageSize, int pageNum) {
+    public List<Project> fetchCommunity(int pageSize, int pageNum) {
         String sql = """
             SELECT * FROM projects WHERE featured = false ORDER BY created_at LIMIT :pageSize OFFSET :pageNum;
         """;
@@ -71,7 +57,7 @@ public class ProjectRepository {
                 .list();
     }
 
-    public List<Project> getFeaturedProjects(int pageSize, int pageNum) {
+    public List<Project> fetchFeatured(int pageSize, int pageNum) {
         String sql = """
             SELECT * FROM projects WHERE featured = true ORDER BY created_at LIMIT :pageSize OFFSET :pageNum;
         """;
@@ -82,13 +68,4 @@ public class ProjectRepository {
                 .query(Project.class)
                 .list();
     }
-
-    public void toggleFeatured(String title) {
-        String sql = """
-        UPDATE projects SET featured = NOT featured WHERE title = :title;
-        """;
-
-        jdbcClient.sql(sql).param("title", title).update();
-    }
-
 }

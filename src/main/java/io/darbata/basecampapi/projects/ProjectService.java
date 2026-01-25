@@ -49,10 +49,7 @@ public class ProjectService {
 
     public PageDTO<ProjectDTO> getProjects(int pageSize, int pageNum, boolean featured) {
 
-        List<Project> projects = featured
-                ? projectRepository.getFeaturedProjects(pageSize, pageNum)
-                : projectRepository.getCommunityProjects(pageSize, pageNum);
-
+        List<Project> projects = projectRepository.getCommunityProjects(pageSize, pageNum);
         List<ProjectDTO> content = projects.stream().map((project) -> {
             UserDTO user = userService.findUserById(project.ownerId());
             return fromEntity(project, user);
@@ -67,8 +64,19 @@ public class ProjectService {
         );
     }
 
-    public void toggleFeatured(String title) {
-        projectRepository.toggleFeatured(title);
+    public ProjectDTO createFeaturedProject(
+            String userId, String title, String tagline, String description, String bannerUrl, long repoId
+    ) {
+        // fetch current state of github repository
+        GithubRepositoryDTO repo = githubService.fetchGithubRepositoryById(userId, repoId);
+
+        // save to database
+        Project project = new Project(null, true, title, tagline, description, bannerUrl, repo.id(),
+                repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.contributors(), repo.stars(),
+                repo.pushedAt(), "system", null);
+        projectRepository.save(project);
+
+        // create dto and return
     }
 
     private ProjectDTO fromEntity(Project project, UserDTO user) {
@@ -76,8 +84,13 @@ public class ProjectService {
                 project.githubRepoId(),
                 project.githubRepoName(),
                 project.githubRepoUrl(),
-                project.githubRepoLanguage()
+                project.githubRepoLanguage(),
+                project.githubRepoOpenTickets(),
+                project.githubRepoContributors(),
+                project.githubRepoStars(),
+                project.githubRepoPushedAt()
         );
+
         return new ProjectDTO(
                 project.title(),
                 project.description(),

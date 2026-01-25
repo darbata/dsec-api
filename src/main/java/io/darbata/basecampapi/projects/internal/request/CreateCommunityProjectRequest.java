@@ -1,6 +1,6 @@
 package io.darbata.basecampapi.projects.internal.request;
 
-public record CreateProjectRequest(String title, String description, long repoId) {
+public record CreateCommunityProjectRequest(String title, String description, long repoId) {
     @Override
     public String toString() {
         return "CreateProjectRequest{" +
