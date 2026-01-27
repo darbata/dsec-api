@@ -1,8 +1,8 @@
-package io.darbata.basecampapi.github.internal.model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package io.darbata.basecampapi.github;
 
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 // taken directly from Github repo
 // map json from Github API to fields in this

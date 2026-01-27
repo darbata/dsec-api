@@ -4,8 +4,8 @@ import io.darbata.basecampapi.auth.AuthService;
 import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
-import io.darbata.basecampapi.github.GithubRepositoryDTO;
-import io.darbata.basecampapi.github.GithubService;
+import io.darbata.basecampapi.github.GithubRepository;
+import io.darbata.basecampapi.github.GithubAPIService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -21,12 +20,12 @@ class UserController {
 
     private final AuthService authService;
     private final ApplicationEventPublisher publisher;
-    private final GithubService githubService;
+    private final GithubAPIService githubAPIService;
 
-    UserController(AuthService userService, ApplicationEventPublisher publisher, GithubService githubService) {
+    UserController(AuthService userService, ApplicationEventPublisher publisher, GithubAPIService githubAPIService) {
         this.authService = userService;
         this.publisher = publisher;
-        this.githubService = githubService;
+        this.githubAPIService = githubAPIService;
     }
 
 
@@ -47,7 +46,7 @@ class UserController {
     ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
         try {
             String userId = jwt.getClaimAsString("sub");
-            List<GithubRepositoryDTO> repos = githubService.fetchUserRepositories(userId);
+            List<GithubRepository> repos = githubAPIService.fetchUserRepositories(userId);
             return ResponseEntity.ok(repos);
         } catch (Exception e) {
             System.err.println(e.getClass().getName());

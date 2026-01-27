@@ -1,8 +1,7 @@
 package io.darbata.basecampapi.github.internal;
 
-import io.darbata.basecampapi.github.GithubRepositoryDTO;
+import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
-import io.darbata.basecampapi.github.internal.model.GithubRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,7 +16,7 @@ import java.util.List;
 @Service
 public interface GithubApiClient {
     @GetExchange(value = "https://api.github.com/user/repos", accept = "application/json")
-    List<GithubRepositoryDTO> fetchUserRepositories(
+    List<GithubRepository> fetchUserRepositories(
             @RequestHeader("Authorization") String token,
             @RequestParam("affiliation") String affiliation,
             @RequestParam("per_page") int perPage,
@@ -44,4 +43,12 @@ public interface GithubApiClient {
             @RequestHeader("Authorization") String token,
             @PathVariable("id") Long id
     );
+
+    @PostExchange("https://github.com/app/installations/{installationId}/access_tokens")
+    InstallationAccessToken getInstallationAccessToken(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("installationId") int installationId
+    );
+
+
 }

@@ -1,0 +1,63 @@
+package io.darbata.basecampapi.github;
+
+import org.springframework.data.domain.Page;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+// cache GitHub Repositories from the API
+@Repository
+public class GithubRepoRepository {
+
+    private final JdbcClient jdbcClient;
+
+    public GithubRepoRepository(JdbcClient jdbcClient) {
+        this.jdbcClient = jdbcClient;
+    }
+
+    public void save(GithubRepository repo) {
+        String sql = """
+            INSERT INTO github_repositories (id, name, url, language, open_tickets, contributors, stars, pushed_at)
+            VALUES (:id, :name, :url, :language, :openTickets, :contributors, :stars, :pushedAt);
+        """;
+
+
+        this.jdbcClient.sql(sql)
+                .params(Map.of(
+                        "id", repo.id(),
+                        "fullName", repo.name(),
+                        "url", repo.url(),
+                        "language", repo.language(),
+                        "openTickets", repo.openTickets(),
+                        "contributors", repo.contributors(),
+                        "stars", repo.stars(),
+                        "pushedAt", repo.pushedAt()
+                ))
+                .update();
+    }
+
+    public Optional<GithubRepository> findById(long repoId) {
+        String sql = """
+        SELECT * FROM github_repositories WHERE id = :id
+        """;
+
+        return this.jdbcClient.sql(sql).query(GithubRepository.class).optional();
+    }
+
+    public List<GithubRepository> findAllCommunity(int pageNum, int pageSize) {
+        return null;
+    }
+
+    public List<GithubRepository> findAllFeatured(int pageNum, int pageSize) {
+        return null;
+    }
+
+    public void delete(long repoId) {
+
+    }
+
+}
