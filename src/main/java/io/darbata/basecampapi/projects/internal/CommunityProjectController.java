@@ -29,6 +29,8 @@ public class CommunityProjectController {
             PageDTO<UserProjectDTO> dto = projectService.getAllCommunityProjects(pageSize, pageNum);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -48,10 +50,12 @@ public class CommunityProjectController {
     ResponseEntity<?> createCommunityProject(@AuthenticationPrincipal Jwt jwt, @RequestBody CreateCommunityProjectRequest request) {
         try {
             String userId = (jwt.getClaimAsString("sub"));
-            UserProjectDTO dto = projectService.createCommunityProject(
+            projectService.createCommunityProject(
                     userId, request.title(), request.description(), request.repoId());
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

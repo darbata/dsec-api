@@ -4,7 +4,7 @@ import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.projects.internal.model.Project;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.UUID;
 
 public record UserProjectDTO (
@@ -18,14 +18,13 @@ public record UserProjectDTO (
     String repoUrl,
     String repoLanguage,
     int repoOpenTickets,
-    int repoContributors,
     int repoStars,
-    Date repoPushedAt
+    Instant repoPushedAt
 ) {
     public static UserProjectDTO from(Project project, UserDTO user, GithubRepository repo) {
         return new UserProjectDTO(
         project.getId(), project.getTitle(), project.getDescription(), user.displayName(), user.avatarUrl(), repo.id(),
-        repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.contributors(), repo.stars(), repo.pushedAt()
+        repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.stars(), repo.pushedAt()
         );
     }
 }

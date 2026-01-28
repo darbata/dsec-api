@@ -45,7 +45,7 @@ class GithubTokenService {
                     }
                     return token;
                 });
-        return t.orElseThrow(() -> new NoTokenException("no github token found"));
+        return t.orElse(null);
     }
 
     public void revokeUserToken(String userId) {

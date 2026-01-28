@@ -20,10 +20,10 @@ public class GithubService {
         this.tokenService = tokenService;
     }
 
-    public List<GithubRepository> fetchUserGithubRepositories(String callerId, String userId) {
+    public List<GithubRepository> fetchUserGithubRepositories(String callerId) {
         // callerId is the id of the current auth user whose token we will be using
         GithubToken token = tokenService.getUserToken(callerId);
-        return githubAPIService.fetchUserRepositories(token, userId);
+        return githubAPIService.fetchUserRepositories(token);
     }
 
     public GithubRepository findById(String callerId, long id) {

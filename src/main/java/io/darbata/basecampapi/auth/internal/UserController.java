@@ -47,7 +47,7 @@ class UserController {
     ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
         try {
             String userId = jwt.getClaimAsString("sub");
-            List<GithubRepository> repos = githubService.fetchUserGithubRepositories(userId, userId);
+            List<GithubRepository> repos = githubService.fetchUserGithubRepositories(userId);
             return ResponseEntity.ok(repos);
         } catch (Exception e) {
             System.err.println(e.getClass().getName());
@@ -78,7 +78,7 @@ class UserController {
         }
     }
 
-    @DeleteMapping("/github/token")
+    @DeleteMapping("/github/oauth")
     ResponseEntity<?> deleteGithubToken(@AuthenticationPrincipal Jwt jwt) {
         try {
             String userId = jwt.getClaimAsString("sub");

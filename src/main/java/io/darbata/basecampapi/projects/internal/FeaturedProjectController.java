@@ -37,6 +37,8 @@ class FeaturedProjectController {
             FeaturedProjectDTO dto = projectService.getFeaturedProjectById(callerId, id);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
 
@@ -53,6 +55,8 @@ class FeaturedProjectController {
                     request.repoId());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

@@ -11,7 +11,7 @@ public class Project {
     private final long repoId;
 
     private OffsetDateTime createdAt;
-    private boolean featured;
+    private Boolean featured;
     private String title;
     private String tagline;
     private String description;
@@ -59,14 +59,14 @@ public class Project {
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public String getOwnerId() { return ownerId; }
     public long getRepoId() { return repoId; }
-    public boolean isFeatured() { return featured; }
+    public Boolean isFeatured() { return featured; }
     public String getTitle() { return title; }
     public String getTagline() { return tagline; }
     public String getDescription() { return description; }
     public String getBannerUrl() { return bannerUrl; }
 
     // used only by factory methods
-    private void setFeatured(boolean featured) { this.featured = featured; }
+    private void setFeatured(Boolean featured) { this.featured = featured; }
     private void setTagline(String tagline) { this.tagline = tagline; }
     private void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
     private void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }

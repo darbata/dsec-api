@@ -5,7 +5,6 @@ import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 // manages token handling
 @Service
@@ -16,7 +15,7 @@ class GithubAPIService {
         this.client = client;
     }
 
-    public List<GithubRepository> fetchUserRepositories(GithubToken token, String userId) {
+    public List<GithubRepository> fetchUserRepositories(GithubToken token) {
         return client.fetchUserRepositories(
                 "Bearer " + token.accessToken(),
                 "owner",
@@ -27,8 +26,8 @@ class GithubAPIService {
 
     public GithubRepository fetchGithubRepositoryById(GithubToken token, long githubRepositoryId) {
         GithubRepository repo = client.getRepository(token.accessToken(), githubRepositoryId);
-        return new io.darbata.basecampapi.github.GithubRepository(repo.id(), repo.name(), repo.url(), repo.language(), repo.openTickets(),
-            repo.contributors(), repo.stars(), repo.pushedAt());
+        return new GithubRepository(repo.id(), repo.name(), repo.url(), repo.language(), repo.openTickets(),
+                repo.stars(), repo.pushedAt());
     }
 }
 

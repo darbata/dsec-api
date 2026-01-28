@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +31,13 @@ public class GithubRepoRepository {
         this.jdbcClient.sql(sql)
                 .params(Map.of(
                         "id", repo.id(),
-                        "fullName", repo.name(),
+                        "name", repo.name(),
                         "url", repo.url(),
                         "language", repo.language(),
                         "openTickets", repo.openTickets(),
-                        "contributors", repo.contributors(),
+                        "contributors", 0,
                         "stars", repo.stars(),
-                        "pushedAt", repo.pushedAt()
+                        "pushedAt", Timestamp.from(repo.pushedAt())
                 ))
                 .update();
     }
@@ -46,7 +47,7 @@ public class GithubRepoRepository {
         SELECT * FROM github_repositories WHERE id = :id
         """;
 
-        return this.jdbcClient.sql(sql).query(GithubRepository.class).optional();
+        return this.jdbcClient.sql(sql).param("id", repoId).query(GithubRepository.class).optional();
     }
 
     public void delete(long repoId) {

@@ -35,7 +35,7 @@ public class ProjectService {
 
     public UserProjectDTO createCommunityProject(String ownerId, String title, String description, long githubRepoId) {
         GithubRepository repo = githubService.findById(ownerId, githubRepoId);
-        Project project = projectRepository.save(Project.createCommunityProject(ownerId, title, description, githubRepoId));
+        Project project = projectRepository.save(Project.createCommunityProject(title, description, ownerId, githubRepoId));
         UserDTO user = userService.findUserById(project.getOwnerId());
         return UserProjectDTO.from(project, user, repo);
     }
@@ -61,7 +61,7 @@ public class ProjectService {
             String callerId, String title, String tagline, String bannerUrl, String description, long githubRepoId
     ) {
         GithubRepository repo = githubService.findById(callerId, githubRepoId);
-        Project project = projectRepository.save(Project.createFeaturedProject(title, tagline, bannerUrl, description, githubRepoId));
+        Project project = projectRepository.save(Project.createFeaturedProject(title, tagline, description, bannerUrl, githubRepoId));
         UserDTO user = userService.findUserById(project.getOwnerId());
         return FeaturedProjectDTO.from(project, user, repo);
     }
