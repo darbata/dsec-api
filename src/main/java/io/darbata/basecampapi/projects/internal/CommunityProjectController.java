@@ -26,7 +26,7 @@ public class CommunityProjectController {
             @RequestParam(defaultValue = "0") int pageNum
     ) {
         try {
-            PageDTO<UserProjectDTO> dto = projectService.getProjects(pageSize, pageNum, false);
+            PageDTO<UserProjectDTO> dto = projectService.getAllCommunityProjects(pageSize, pageNum);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
@@ -34,9 +34,10 @@ public class CommunityProjectController {
     }
 
     @GetMapping("/{id}")
-    ResponseEntity<?> getProjectDetailsByTitle(@PathVariable UUID id) {
+    ResponseEntity<?> getProjectDetailsByTitle(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID id) {
         try {
-            UserProjectDTO dto = projectService.getById(id);
+            String callerId = jwt.getClaimAsString("sub");
+            UserProjectDTO dto = projectService.getById(callerId, id);
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

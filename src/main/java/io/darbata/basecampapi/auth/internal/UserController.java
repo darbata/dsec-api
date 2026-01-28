@@ -5,7 +5,8 @@ import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
 import io.darbata.basecampapi.github.GithubRepository;
-import io.darbata.basecampapi.github.GithubAPIService;
+import io.darbata.basecampapi.github.GithubService;
+import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,12 +21,12 @@ class UserController {
 
     private final AuthService authService;
     private final ApplicationEventPublisher publisher;
-    private final GithubAPIService githubAPIService;
+    private final GithubService githubService;
 
-    UserController(AuthService userService, ApplicationEventPublisher publisher, GithubAPIService githubAPIService) {
-        this.authService = userService;
+    UserController(AuthService authService, ApplicationEventPublisher publisher, GithubService githubService) {
+        this.authService = authService;
         this.publisher = publisher;
-        this.githubAPIService = githubAPIService;
+        this.githubService = githubService;
     }
 
 
@@ -46,7 +47,7 @@ class UserController {
     ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
         try {
             String userId = jwt.getClaimAsString("sub");
-            List<GithubRepository> repos = githubAPIService.fetchUserRepositories(userId);
+            List<GithubRepository> repos = githubService.fetchUserGithubRepositories(userId, userId);
             return ResponseEntity.ok(repos);
         } catch (Exception e) {
             System.err.println(e.getClass().getName());

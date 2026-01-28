@@ -1,5 +1,6 @@
 package io.darbata.basecampapi.github;
 
+import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,45 +12,45 @@ public class GithubService {
 
     private final GithubRepoRepository repository;
     private final GithubAPIService githubAPIService;
+    private final GithubTokenService tokenService;
 
-    public GithubService(GithubRepoRepository repository, GithubAPIService githubAPIService) {
+    public GithubService(GithubRepoRepository repository, GithubAPIService githubAPIService, GithubTokenService tokenService) {
         this.repository = repository;
         this.githubAPIService = githubAPIService;
+        this.tokenService = tokenService;
     }
 
-    public boolean isGithubConnected(String userId) {
-        return githubAPIService.isGithubConnected(userId);
+    public List<GithubRepository> fetchUserGithubRepositories(String callerId, String userId) {
+        // callerId is the id of the current auth user whose token we will be using
+        GithubToken token = tokenService.getUserToken(callerId);
+        return githubAPIService.fetchUserRepositories(token, userId);
     }
 
-    public void disconnectGithub(String userId) {
-        githubAPIService.disconnectGithub(userId);
-    }
-
-    public List<GithubRepository> fetchUserGithubRepositories(String userId) {
-        return githubAPIService.fetchUserRepositories(userId);
-    }
-
-    public GithubRepository fetchGithubRepository(String userId, long id) {
-        GithubRepository repo = githubAPIService.fetchGithubRepositoryById(userId, id);
-        repository.save(repo);
-        return repository.findById(id).orElseThrow();
-    }
-
-    public GithubRepository findById(String userId, long id) {
+    public GithubRepository findById(String callerId, long id) {
+        // callerId is the id of the current auth user whose token we will be using
         return repository.findById(id)
-                .orElseGet(() -> fetchGithubRepository(userId, id));
-    }
-
-    public List<GithubRepository> findAllCommunity(int pageNum, int pageSize) {
-        return repository.findAllCommunity(pageNum, pageSize);
-    }
-
-    public List<GithubRepository> findAllFeatured(int pageNum, int pageSize) {
-        return repository.findAllFeatured(pageNum, pageSize);
+                .orElseGet(() -> fetchGithubRepository(callerId, id));
     }
 
     public void delete(long repoId) {
         repository.delete(repoId);
     }
+
+    public void revokeToken(String userId) {
+        tokenService.revokeUserToken(userId);
+    }
+
+    public boolean validateUserToken(String userId) {
+        return tokenService.getUserToken(userId) != null;
+    }
+
+    private GithubRepository fetchGithubRepository(String callerId, long id) {
+        // callerId is the id of the current auth user whose token we will be using
+        GithubToken token = tokenService.getUserToken(callerId);
+        GithubRepository repo = githubAPIService.fetchGithubRepositoryById(token, id);
+        repository.save(repo);
+        return repository.findById(id).orElseThrow();
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package io.darbata.basecampapi.github;
 
+import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -48,15 +49,11 @@ public class GithubRepoRepository {
         return this.jdbcClient.sql(sql).query(GithubRepository.class).optional();
     }
 
-    public List<GithubRepository> findAllCommunity(int pageNum, int pageSize) {
-        return null;
-    }
-
-    public List<GithubRepository> findAllFeatured(int pageNum, int pageSize) {
-        return null;
-    }
-
     public void delete(long repoId) {
+        String sql = """
+        DELETE FROM github_repositories WHERE id = :id
+        """;
+        this.jdbcClient.sql(sql).params(Map.of("id", repoId)).update();
 
     }
 

@@ -49,6 +49,4 @@ public interface GithubApiClient {
             @RequestHeader("Authorization") String token,
             @PathVariable("installationId") int installationId
     );
-
-
 }
