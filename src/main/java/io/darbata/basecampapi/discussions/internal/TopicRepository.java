@@ -40,14 +40,12 @@ public class TopicRepository {
         return new UnitTopic(id, topic.unitCode(), topic.unitSiteUrl(), topic.description());
     }
 
-    public List<UnitTopic> getUnitTopics(int pageSize, int pageNum) {
+    public List<UnitTopic> getUnitTopics() {
         String sql = """
-        SELECT * FROM unit_topics LIMIT :pageSize OFFSET :pageNum;
+        SELECT * FROM unit_topics;
         """;
 
         return jdbcClient.sql(sql)
-                .param("pageNum", pageNum)
-                .param("pageSize", pageSize)
                 .query(UnitTopic.class)
                 .list();
     }

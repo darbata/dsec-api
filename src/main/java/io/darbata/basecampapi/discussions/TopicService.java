@@ -2,7 +2,6 @@ package io.darbata.basecampapi.discussions;
 
 import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.UserService;
-import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.discussions.internal.*;
 import io.darbata.basecampapi.discussions.internal.dto.DiscussionDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDTO;
@@ -28,10 +27,9 @@ public class TopicService {
         return new UnitTopicDTO(topic.unitCode(), topic.unitSiteUrl(), topic.description());
     }
 
-    public PageDTO<UnitTopicDTO> getUnitTopics(String sortCol, int pageSize, int pageNumber) {
-        List<UnitTopicDTO> topics = topicRepository.getUnitTopics(pageSize, pageNumber)
+    public List<UnitTopicDTO> getUnitTopics() {
+        return topicRepository.getUnitTopics()
                 .stream().map(UnitTopicDTO::fromEntity).toList();
-        return new PageDTO<>(topics, sortCol, true, pageSize, pageNumber);
     }
 
 
@@ -93,6 +91,14 @@ public class TopicService {
     }
 
 
-
+    public DiscussionDTO createReplyToDiscussion(String userId, UUID parentDiscussionId, String content) {
+        Discussion parent =  topicRepository.getDiscussionById(parentDiscussionId);
+        Discussion discussion = topicRepository.createDiscussion(
+                new Discussion(null, parent.topicId(), parentDiscussionId, userId, content, null)
+        );
+        UserDTO user = userService.findUserById(discussion.userId());
+        return new DiscussionDTO(discussion.id(), discussion.parentDiscussionId(), user, content,
+                new ArrayList<>(), discussion.createdAt());
+    }
 }
 

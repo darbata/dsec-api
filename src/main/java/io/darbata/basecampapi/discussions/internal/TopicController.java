@@ -6,6 +6,7 @@ import io.darbata.basecampapi.discussions.TopicService;
 import io.darbata.basecampapi.discussions.internal.dto.DiscussionDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDTO;
 import io.darbata.basecampapi.discussions.internal.dto.UnitTopicDetailsDTO;
+import io.darbata.basecampapi.discussions.internal.model.Discussion;
 import io.darbata.basecampapi.discussions.internal.request.CreateDiscussionRequest;
 import io.darbata.basecampapi.discussions.internal.request.CreateUnitTopicRequest;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -48,11 +50,15 @@ class TopicController {
         }
     }
 
-    @PostMapping("/")
-    public ResponseEntity<?> createUnitTopic(@RequestBody CreateUnitTopicRequest request) {
+    @PostMapping("/discussions/{discussionId}")
+    public ResponseEntity<?> replyToDiscussion(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody CreateDiscussionRequest request
+    ) {
         try {
-            UnitTopicDTO dto = topicService.createUnitTopic(
-                    request.unitCode(), request.unitSiteUrl(), request.description());
+            System.out.println("DISCUSSION REPLY");
+            String id = jwt.getClaimAsString("sub");
+            DiscussionDTO dto = topicService.createReplyToDiscussion(id, request.parentDiscussionId(), request.content());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();
@@ -62,11 +68,10 @@ class TopicController {
     }
 
     @GetMapping("/units")
-    public ResponseEntity<?> getUnitTopics(
-            @RequestParam(defaultValue = "50") int pageSize, @RequestParam(defaultValue = "0") int pageNum)
+    public ResponseEntity<?> getUnitTopics()
     {
         try {
-            PageDTO<UnitTopicDTO> dto = topicService.getUnitTopics("unit_code", pageSize, pageNum);
+            List<UnitTopicDTO> dto = topicService.getUnitTopics();
             return  ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();

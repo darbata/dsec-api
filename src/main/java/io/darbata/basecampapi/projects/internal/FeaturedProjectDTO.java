@@ -5,7 +5,6 @@ import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.projects.internal.model.Project;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 
 public record FeaturedProjectDTO (
