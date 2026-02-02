@@ -21,13 +21,15 @@ public record FeaturedProjectDTO (
         String repoLanguage,
         int repoOpenTickets,
         int repoStars,
-        Instant repoPushedAt
+        Instant repoPushedAt,
+        String githubOwnnerLogin,
+        int githubProjectNumber
 ) {
     public static FeaturedProjectDTO from(Project project, UserDTO user, GithubRepository repo) {
         return new FeaturedProjectDTO(
                 project.getId(), project.getTitle(), project.getTagline(), project.getBannerUrl(), project.getDescription(),
                 user.displayName(), user.avatarUrl(), repo.id(),
-                repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.stars(), repo.pushedAt()
+                repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.stars(), repo.pushedAt(), repo.owner().login(), project.getGithubProjectBoardNum()
         );
     }
 }
