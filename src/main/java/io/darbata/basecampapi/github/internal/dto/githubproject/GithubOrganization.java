@@ -1,3 +1,7 @@
 package io.darbata.basecampapi.github.internal.dto.githubproject;
 
-public record GithubOrganization(ProjectV2 projectV2) {}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record GithubOrganization(
+        @JsonProperty("projectV2") ProjectV2 projectV2
+) {}

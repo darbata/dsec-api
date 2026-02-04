@@ -16,18 +16,6 @@ public record GithubRepository (
         @JsonProperty("language") String language,
         @JsonProperty("open_issues_count") int openTickets,
         @JsonProperty("stargazers_count") int stars,
-        @JsonProperty("pushed_at") Instant pushedAt
-) {
-    @Override
-    public String toString() {
-        return "GithubRepository{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", url='" + url + '\'' +
-                ", language='" + language + '\'' +
-                ", openTickets=" + openTickets +
-                ", stars=" + stars +
-                ", pushedAt=" + pushedAt +
-                '}';
-    }
-}
+        @JsonProperty("pushed_at") Instant pushedAt,
+        @JsonProperty("owner") GithubOwner owner
+) { }

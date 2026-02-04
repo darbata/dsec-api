@@ -5,10 +5,11 @@ import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.github.GithubService;
-import io.darbata.basecampapi.projects.internal.FeaturedProjectDTO;
+import io.darbata.basecampapi.github.internal.IssueComment;
 import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
 import io.darbata.basecampapi.projects.internal.model.Project;
 import io.darbata.basecampapi.projects.internal.ProjectRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,10 +18,12 @@ import java.util.UUID;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+
     private final GithubService githubService;
     private final UserService userService;
 
-    ProjectService(ProjectRepository repo, UserService userService, GithubService githubService) {
+    // TODO: FIX CIRCULAR DEPENDENCY
+    ProjectService(ProjectRepository repo, @Lazy UserService userService, @Lazy GithubService githubService) {
         this.projectRepository = repo;
         this.userService = userService;
         this.githubService = githubService;
@@ -61,10 +64,17 @@ public class ProjectService {
             String callerId, String title, String tagline, String bannerUrl, String description, long githubRepoId
     ) {
         GithubRepository repo = githubService.findById(callerId, githubRepoId);
-        Project project = projectRepository.save(Project.createFeaturedProject(title, tagline, description, bannerUrl, githubRepoId));
+        Project project = projectRepository.save(Project.createFeaturedProject(
+                title, tagline, description, bannerUrl, githubRepoId, repo.owner().login()
+        ));
         UserDTO user = userService.findUserById(project.getOwnerId());
         return FeaturedProjectDTO.from(project, user, repo);
     }
 
+    // todo change return type
+    public void assignProjectIssueToUser(String userId, UUID projectId, int issueId) {
+        Project project =  projectRepository.findById(projectId).orElseThrow();
+        githubService.createIssueComment(userId, project.getRepoId(), issueId);
+    }
 }
 

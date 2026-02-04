@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public class Project {
 
-    private final UUID id;
-    private final String ownerId;
-    private final long repoId;
+    private UUID id;
+    private String ownerId;
+    private long repoId;
 
     private OffsetDateTime createdAt;
     private Boolean featured;
@@ -17,16 +17,20 @@ public class Project {
     private String description;
     private String bannerUrl;
 
+    private int githubProjectNum; // ProjectV2 number
+
+
     private Project(String title, String description, String ownerId, long repoId) {
         this.id = null;
-        this.createdAt = null;
         this.title = Objects.requireNonNull(title, "Title cannot be null");
         this.description = Objects.requireNonNull(description, "Description cannot be null");
-        this.ownerId = Objects.requireNonNull(ownerId, "OwnerId cannot be null");
-        this.repoId = repoId;
         this.tagline = "";
         this.bannerUrl = "";
         this.featured = false;
+        this.createdAt = null;
+        this.ownerId = Objects.requireNonNull(ownerId, "OwnerId cannot be null");
+        this.repoId = repoId;
+        this.githubProjectNum = 0;
     }
 
     public static Project createCommunityProject(String title, String description, String ownerId, long repoId) {
@@ -34,7 +38,8 @@ public class Project {
     }
 
     public static Project createFeaturedProject(
-            String title, String tagline, String description, String bannerUrl, long repoId
+            String title, String tagline, String description, String bannerUrl, long repoId,
+            String githubOwnerName
     ) {
         Project project = new Project(title, description, "system", repoId);
         project.setFeatured(true);
@@ -44,14 +49,16 @@ public class Project {
     }
 
     public static Project load(
-            String title, OffsetDateTime createdAt, String description, String ownerId, long repoId, String tagline,
-            String bannerUrl, boolean featured
+            UUID id, String title, String description, String tagline, String bannerUrl, boolean featured,
+            OffsetDateTime createdAt, String ownerId, long repoId, int githubProjectNum
     ) {
         Project project = new Project(title, description, ownerId, repoId);
+        project.setId(id);
         project.setCreatedAt(createdAt);
         project.setFeatured(featured);
         project.setTagline(tagline);
         project.setBannerUrl(bannerUrl);
+        project.setGithubProjectNum(githubProjectNum);
         return project;
     }
 
@@ -64,10 +71,15 @@ public class Project {
     public String getTagline() { return tagline; }
     public String getDescription() { return description; }
     public String getBannerUrl() { return bannerUrl; }
+    public int getGithubProjectNum() {return githubProjectNum;}
 
     // used only by factory methods
+    private void setId(UUID id) {this.id = id;}
+    private void setOwnerId(String ownerId) {this.ownerId = ownerId;}
+    private void setRepoId(long repoId) {this.repoId = repoId;}
     private void setFeatured(Boolean featured) { this.featured = featured; }
     private void setTagline(String tagline) { this.tagline = tagline; }
     private void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
     private void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    private void setGithubProjectNum(int githubProjectNum) {this.githubProjectNum = githubProjectNum;}
 }

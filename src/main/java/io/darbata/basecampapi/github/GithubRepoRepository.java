@@ -1,13 +1,10 @@
 package io.darbata.basecampapi.github;
 
-import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,8 +20,8 @@ public class GithubRepoRepository {
 
     public void save(GithubRepository repo) {
         String sql = """
-            INSERT INTO github_repositories (id, name, url, language, open_tickets, contributors, stars, pushed_at)
-            VALUES (:id, :name, :url, :language, :openTickets, :contributors, :stars, :pushedAt);
+            INSERT INTO github_repositories (id, name, url, language, open_tickets, contributors, stars, pushed_at, owner_login)
+            VALUES (:id, :name, :url, :language, :openTickets, :contributors, :stars, :pushedAt, :ownerLogin);
         """;
 
 
@@ -37,7 +34,8 @@ public class GithubRepoRepository {
                         "openTickets", repo.openTickets(),
                         "contributors", 0,
                         "stars", repo.stars(),
-                        "pushedAt", Timestamp.from(repo.pushedAt())
+                        "pushedAt", Timestamp.from(repo.pushedAt()),
+                        "ownerLogin", repo.owner().login()
                 ))
                 .update();
     }
@@ -47,15 +45,36 @@ public class GithubRepoRepository {
         SELECT * FROM github_repositories WHERE id = :id
         """;
 
-        return this.jdbcClient.sql(sql).param("id", repoId).query(GithubRepository.class).optional();
+        return this.jdbcClient.sql(sql)
+                .param("id", repoId)
+                .query((rs, rowNum) -> {
+
+                    Timestamp ts = rs.getTimestamp("pushed_at");
+                    Instant pushedAtInstant = (ts != null) ? ts.toInstant() : null;
+
+                    GithubOwner owner = new GithubOwner(rs.getString("owner_login"));
+
+                    return new GithubRepository(
+                            rs.getLong("id"),
+                            rs.getString("name"),
+                            rs.getString("url"),
+                            rs.getString("language"),
+                            rs.getInt("open_tickets"),
+                            rs.getInt("stars"),
+                            pushedAtInstant,
+                            owner
+                    );
+                })
+                .optional();
     }
 
     public void delete(long repoId) {
         String sql = """
         DELETE FROM github_repositories WHERE id = :id
         """;
-        this.jdbcClient.sql(sql).params(Map.of("id", repoId)).update();
+        this.jdbcClient.sql(sql)
+                .param("id", repoId)
+                .update();
 
     }
-
 }

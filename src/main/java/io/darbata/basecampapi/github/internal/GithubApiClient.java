@@ -2,8 +2,10 @@ package io.darbata.basecampapi.github.internal;
 
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
+import io.darbata.basecampapi.github.internal.dto.githubproject.GithubGraphQLResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
@@ -44,9 +46,30 @@ public interface GithubApiClient {
             @PathVariable("id") Long id
     );
 
-    @PostExchange("https://github.com/app/installations/{installationId}/access_tokens")
+    @PostExchange(value = "https://api.github.com/app/installations/{installationId}/access_tokens", contentType = "application/json", accept = "application/vnd.github+json")
     InstallationAccessToken getInstallationAccessToken(
             @RequestHeader("Authorization") String token,
             @PathVariable("installationId") int installationId
+    );
+
+    @PostExchange(value = "https://api.github.com/graphql", contentType = "application/json")
+    GithubGraphQLResponse queryGraphQL(
+            @RequestHeader("Authorization") String token,
+            @RequestBody GraphQLRequest body
+    );
+
+    @PostExchange(value = "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments")
+    IssueComment createIssueComment(
+            @RequestHeader("Authorization") String token,
+            @PathVariable String owner,
+            @PathVariable String repo,
+            @PathVariable("issue_number") int issueNumber,
+            @RequestBody CreateIssueCommentRequest body
+    );
+
+    @GetExchange("https://api.github.com/orgs/{org}/repos")
+    List<GithubRepository> fetchOrganisationRepositories(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("org") String org
     );
 }

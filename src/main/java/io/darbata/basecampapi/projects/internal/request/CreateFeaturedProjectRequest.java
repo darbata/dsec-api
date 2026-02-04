@@ -5,5 +5,6 @@ public record CreateFeaturedProjectRequest(
         String tagline,
         String description,
         String bannerUrl,
-        long repoId
+        long repoId,
+        int projectNumber // dsec-hub project number
 ) { }

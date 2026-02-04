@@ -21,7 +21,10 @@ public class GithubTokenRepository {
             SELECT * FROM github_tokens WHERE user_id = :userId;
         """;
 
-        return jdbcClient.sql(sql).param("userId", userId).query(GithubToken.class).optional();
+        return jdbcClient.sql(sql)
+                .param("userId", userId)
+                .query(GithubToken.class)
+                .optional();
     }
 
     public GithubToken save(GithubToken token) {

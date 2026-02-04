@@ -14,7 +14,6 @@ public record GithubToken(
         String tokenType
 ) {
     public static GithubToken fromDto(String userId, GithubTokenDTO dto) {
-        System.out.println("Github token from dto: " + dto);
         return new GithubToken(
                 userId,
                 dto.accessToken(),

@@ -56,7 +56,6 @@ class TopicController {
             @RequestBody CreateDiscussionRequest request
     ) {
         try {
-            System.out.println("DISCUSSION REPLY");
             String id = jwt.getClaimAsString("sub");
             DiscussionDTO dto = topicService.createReplyToDiscussion(id, request.parentDiscussionId(), request.content());
             return ResponseEntity.ok(dto);

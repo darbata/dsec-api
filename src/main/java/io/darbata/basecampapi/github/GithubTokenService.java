@@ -43,7 +43,7 @@ class GithubTokenService {
                     if (!token.validAccessToken()) {
                         return refreshToken(userId, token);
                     }
-                    return token;
+                    return token; // can be null
                 });
         return t.orElse(null);
     }
@@ -56,8 +56,8 @@ class GithubTokenService {
         GithubTokenDTO dto = client.refreshToken(githubClientId, githubClientSecret, "refresh_token", expiredToken.refreshToken());
 
         if (dto.error() != null || dto.accessToken() == null) {
-            tokenRepository.deleteById(userId);
-            throw new GithubCodeTokenExchangeException("Github session expired, user must login again");
+            revokeUserToken(userId);
+            return null;
         }
 
 

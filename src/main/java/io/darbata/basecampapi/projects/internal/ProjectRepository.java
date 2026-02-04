@@ -1,6 +1,6 @@
 package io.darbata.basecampapi.projects.internal;
 
-import io.darbata.basecampapi.github.GithubRepository;
+import io.darbata.basecampapi.projects.FeaturedProjectDTO;
 import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
 import io.darbata.basecampapi.projects.internal.model.Project;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +28,20 @@ public class ProjectRepository {
 
         return jdbcClient.sql(sql)
                 .param("id", projectId)
-                .query(Project.class)
+                .query((rs, rowIndex) -> {
+                    return Project.load(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getString("tagline"),
+                            rs.getString("banner_url"),
+                            rs.getBoolean("featured"),
+                            rs.getObject("created_at", OffsetDateTime.class),
+                            rs.getString("owner_id"),
+                            rs.getLong("repo_id"),
+                            rs.getInt("project_number")
+                    );
+                })
                 .optional();
     }
 
@@ -116,7 +130,9 @@ public class ProjectRepository {
                 g.open_tickets AS repoOpenTickets,
                 g.contributors AS repoContributors,
                 g.stars AS repoStars,
-                g.pushed_at AS repoPushedAt
+                g.pushed_at AS repoPushedAt,
+                g.owner_login AS repoOwnerLogin,
+                p.project_number AS repoProjectNumber
             FROM projects p 
             JOIN oauth_users u ON p.owner_id = u.id
             LEFT JOIN github_repositories g ON p.repo_id = g.id
@@ -145,7 +161,9 @@ public class ProjectRepository {
                             rs.getString("repoLanguage"),
                             rs.getInt("repoOpenTickets"),
                             rs.getInt("repoStars"),
-                            pushedAtInstant
+                            pushedAtInstant,
+                            rs.getString("repoOwnerLogin"),
+                            rs.getInt("repoProjectNumber")
                     );
                 })
                 .list();

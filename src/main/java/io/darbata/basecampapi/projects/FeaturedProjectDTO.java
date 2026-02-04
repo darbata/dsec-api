@@ -1,4 +1,4 @@
-package io.darbata.basecampapi.projects.internal;
+package io.darbata.basecampapi.projects;
 
 import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.github.GithubRepository;
@@ -22,14 +22,14 @@ public record FeaturedProjectDTO (
         int repoOpenTickets,
         int repoStars,
         Instant repoPushedAt,
-        String githubOwnnerLogin,
+        String githubOwnerLogin,
         int githubProjectNumber
 ) {
     public static FeaturedProjectDTO from(Project project, UserDTO user, GithubRepository repo) {
         return new FeaturedProjectDTO(
                 project.getId(), project.getTitle(), project.getTagline(), project.getBannerUrl(), project.getDescription(),
                 user.displayName(), user.avatarUrl(), repo.id(),
-                repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.stars(), repo.pushedAt(), repo.owner().login(), project.getGithubProjectBoardNum()
+                repo.name(), repo.url(), repo.language(), repo.openTickets(), repo.stars(), repo.pushedAt(), repo.owner().login(), project.getGithubProjectNum()
         );
     }
 }
