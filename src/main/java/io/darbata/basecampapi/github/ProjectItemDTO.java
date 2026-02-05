@@ -8,12 +8,14 @@ import java.util.List;
 
 public record ProjectItemDTO(
         String organisation,
-        long projectNumber,
-        long issueNumber, // found from url
+        int projectNumber,
+        int issueNumber,
         String title,
         String body,
         String url,
         String status, // to-do, in progress, done
+        String statusFieldId,
+        List<StatusFieldOption> statusOptions,
         List<AssigneeNode> assignees,
         Instant createdAt,
         Instant updatedAt,

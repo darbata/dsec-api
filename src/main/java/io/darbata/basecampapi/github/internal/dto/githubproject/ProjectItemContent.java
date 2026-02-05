@@ -7,6 +7,7 @@ import java.util.List;
 
 public record ProjectItemContent(
         @JsonProperty("title") String title,
+        @JsonProperty("number") int number,
         @JsonProperty("body") String body,
         @JsonProperty("url") String url,
         @JsonProperty("createdAt") Instant createdAt,

@@ -17,6 +17,12 @@ import java.util.List;
 @HttpExchange
 @Service
 public interface GithubApiClient {
+
+    @GetExchange(value = "https://api.github.com/user", accept = "application/json")
+    GithubUser getAuthenticatedUser(
+            @RequestHeader("Authorization") String token
+    );
+
     @GetExchange(value = "https://api.github.com/user/repos", accept = "application/json")
     List<GithubRepository> fetchUserRepositories(
             @RequestHeader("Authorization") String token,
@@ -71,5 +77,14 @@ public interface GithubApiClient {
     List<GithubRepository> fetchOrganisationRepositories(
             @RequestHeader("Authorization") String token,
             @PathVariable("org") String org
+    );
+
+    @PostExchange(value = "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/assignees")
+    void assignIssue(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("owner") String owner,
+            @PathVariable("repo") String repo,
+            @PathVariable("issue_number") int issueNumber,
+            @RequestBody AssigneesRequest assignees
     );
 }

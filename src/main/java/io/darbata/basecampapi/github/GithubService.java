@@ -1,7 +1,9 @@
 package io.darbata.basecampapi.github;
 
+import io.darbata.basecampapi.github.internal.GithubUser;
 import io.darbata.basecampapi.github.internal.InstallationAccessToken;
 import io.darbata.basecampapi.github.internal.IssueComment;
+import io.darbata.basecampapi.github.internal.dto.githubproject.FieldValueNode;
 import io.darbata.basecampapi.github.internal.dto.githubproject.GithubGraphQLResponse;
 import io.darbata.basecampapi.github.internal.dto.githubproject.ProjectV2;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
@@ -11,7 +13,9 @@ import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -65,7 +69,7 @@ public class GithubService {
         return repository.findById(id).orElseThrow();
     }
 
-    public IssueComment createIssueComment(String callerId, long repoId, int issueNumber ) {
+    public IssueComment createIssueComment(String callerId, long repoId, int issueNumber, String comment) {
         GithubRepository repo = findById(callerId, repoId);
 
         String[] repoNameSplit = repo.name().split("/");
@@ -73,7 +77,19 @@ public class GithubService {
 
         GithubToken token = tokenService.getUserToken(callerId);
 
-        return githubAPIService.commentOnIssue(token, repo.owner().login(), repoName, issueNumber);
+        return githubAPIService.commentOnIssue(token, repo.owner().login(), repoName, issueNumber, comment);
+    }
+
+    public GithubUser getAuthenticatedUser(String callerId) {
+        GithubToken token = tokenService.getUserToken(callerId);
+        return githubAPIService.getAuthenticatedUser(token);
+    }
+
+    public void assignIssueToSelf(String callerId, long repoId, int issueNumber) throws Exception {
+        InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
+        GithubUser user = getAuthenticatedUser(callerId);
+        GithubRepository repo = findById(callerId, repoId);
+        githubAPIService.assignGithubIssue(token, repo.name(), issueNumber, user.login());
     }
 
 
@@ -98,16 +114,28 @@ public class GithubService {
         }
 
         return projectV2.items().nodes().stream().map((projectNode) -> {
-            String[] projectUrl = projectNode.content().url().split("/");
-            long issueNumber = Long.parseLong(projectUrl[projectUrl.length - 1]);
 
-            String status = projectNode.fieldValues().nodes().stream()
+            int issueNumber = projectNode.content().number();
+
+            Optional<FieldValueNode> status = projectNode.fieldValues().nodes().stream()
                     .filter(fieldValueNode -> fieldValueNode.field() != null &&
                             "Status".equals(fieldValueNode.field().name()))
-                    .map(fieldValueNode -> fieldValueNode.name())
-                    .findAny()
-                    .orElse("No Status");
+                    .findAny();
 
+            String statusName = status.map(FieldValueNode::name).orElse(null);
+            String statusFieldId = status.map(node -> node.field().id()).orElse(null);
+
+
+            List<StatusFieldOption> statusOptions = new ArrayList<>();
+
+            if (status.isPresent() && status.get().field().options() != null) {
+                statusOptions = status.get().field().options().stream()
+                        .map(option -> new StatusFieldOption(
+                                option.name(),
+                                option.id()
+                        ))
+                        .toList();
+            }
 
             return new ProjectItemDTO(
                     "dsec",
@@ -116,7 +144,9 @@ public class GithubService {
                     projectNode.content().title(),
                     projectNode.content().body(),
                     projectNode.content().url(),
-                    status,
+                    statusName,
+                    statusFieldId,
+                    statusOptions,
                     projectNode.content().assignees().nodes(),
                     projectNode.content().createdAt(),
                     projectNode.content().updatedAt(),
@@ -128,5 +158,32 @@ public class GithubService {
     public List<GithubRepository> fetchOrganisationRepositories() throws Exception {
         InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
         return githubAPIService.fetchOrganisationRepositories(token);
+    }
+
+    public void updateItemStatus(int githubProjectNumber, int itemNumber, IssueStatus newStatus) throws Exception {
+        System.out.println("Updating item status for project #" + githubProjectNumber + ": " + itemNumber);
+        InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
+        GithubGraphQLResponse response = githubAPIService.fetchGithubProjectItems(token, githubProjectNumber);
+
+        ProjectV2 project = response.data().organization().projectV2();
+
+        ProjectItemNode item = project.items().nodes()
+                .stream()
+                .filter(itemNode -> itemNode.content().number() == itemNumber)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("item not found"));
+
+        FieldValueNode status = item.fieldValues().nodes().stream()
+                .filter(fieldValueNode -> fieldValueNode != null && fieldValueNode.field() != null && "Status".equals(fieldValueNode.field().name()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("status not found"));
+
+        String intendedStatusOptionId = status.field().options().stream()
+                .filter(option -> option != null && option.name().equals(newStatus.getValue()))
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("no status field found"))
+                .id();
+
+        githubAPIService.updateItemStatus(token, project.id(), item.id(), status.field().id(), intendedStatusOptionId);
     }
 }

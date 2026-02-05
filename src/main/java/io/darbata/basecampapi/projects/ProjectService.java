@@ -5,6 +5,7 @@ import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.github.GithubService;
+import io.darbata.basecampapi.github.IssueStatus;
 import io.darbata.basecampapi.github.internal.IssueComment;
 import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
 import io.darbata.basecampapi.projects.internal.model.Project;
@@ -71,10 +72,12 @@ public class ProjectService {
         return FeaturedProjectDTO.from(project, user, repo);
     }
 
-    // todo change return type
-    public void assignProjectIssueToUser(String userId, UUID projectId, int issueId) {
-        Project project =  projectRepository.findById(projectId).orElseThrow();
-        githubService.createIssueComment(userId, project.getRepoId(), issueId);
+    public void assignProjectIssueToUser(String userId, UUID projectId, int issueNumber) throws Exception {
+        Project project = projectRepository.findById(projectId).orElseThrow();
+        String message = "Assigned issue to self - Basecamp";
+        githubService.createIssueComment(userId, project.getRepoId(), issueNumber, message);
+        githubService.assignIssueToSelf(userId, project.getRepoId(), issueNumber);
+        githubService.updateItemStatus(project.getGithubProjectNum(), issueNumber, IssueStatus.IN_PROGRESS);
     }
 }
 
