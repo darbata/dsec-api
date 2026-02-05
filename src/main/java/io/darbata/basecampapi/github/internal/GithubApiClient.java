@@ -67,8 +67,8 @@ public interface GithubApiClient {
     @PostExchange(value = "https://api.github.com/repos/{owner}/{repo}/issues/{issue_number}/comments")
     IssueComment createIssueComment(
             @RequestHeader("Authorization") String token,
-            @PathVariable String owner,
-            @PathVariable String repo,
+            @PathVariable("owner") String owner,
+            @PathVariable("repo") String repo,
             @PathVariable("issue_number") int issueNumber,
             @RequestBody CreateIssueCommentRequest body
     );

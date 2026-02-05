@@ -69,11 +69,13 @@ class GithubTokenService {
 
     @EventListener
     void exchangeToken(GithubExchangeTokenEvent event) {
+        System.out.println(githubClientId);
+        System.out.println(githubClientSecret);
         GithubTokenDTO dto = client.exchangeCodeForToken(githubClientId, githubClientSecret, event.code());
         System.out.println("Github code token: " + dto.accessToken());
 
         if (dto.error() != null) {
-            throw new GithubCodeTokenExchangeException("Error exchanging code for token for user " + event.userId() + " with error : " + dto == null ? "" : dto.error());
+            throw new GithubCodeTokenExchangeException("Error ... with error : " + (dto == null ? "" : dto.error()));
         }
 
         GithubToken token = GithubToken.fromDto(event.userId(), dto);
