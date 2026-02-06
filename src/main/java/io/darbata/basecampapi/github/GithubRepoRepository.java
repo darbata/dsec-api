@@ -20,8 +20,8 @@ public class GithubRepoRepository {
 
     public void save(GithubRepository repo) {
         String sql = """
-            INSERT INTO github_repositories (id, name, url, language, open_tickets, contributors, stars, pushed_at, owner_login)
-            VALUES (:id, :name, :url, :language, :openTickets, :contributors, :stars, :pushedAt, :ownerLogin);
+            INSERT INTO github_repositories (id, name, url, language, open_tickets, contributors, stars, pushed_at, owner_login, owner_avatar_url)
+            VALUES (:id, :name, :url, :language, :openTickets, :contributors, :stars, :pushedAt, :ownerLogin, :ownerAvatarUrl);
         """;
 
 
@@ -35,7 +35,8 @@ public class GithubRepoRepository {
                         "contributors", 0,
                         "stars", repo.stars(),
                         "pushedAt", Timestamp.from(repo.pushedAt()),
-                        "ownerLogin", repo.owner().login()
+                        "ownerLogin", repo.owner().login(),
+                        "ownerAvatarUrl", repo.owner().avatarUrl()
                 ))
                 .update();
     }
@@ -52,7 +53,10 @@ public class GithubRepoRepository {
                     Timestamp ts = rs.getTimestamp("pushed_at");
                     Instant pushedAtInstant = (ts != null) ? ts.toInstant() : null;
 
-                    GithubOwner owner = new GithubOwner(rs.getString("owner_login"));
+                    GithubOwner owner = new GithubOwner(
+                            rs.getString("owner_login"),
+                            rs.getString("owner_avatar_url")
+                    );
 
                     return new GithubRepository(
                             rs.getLong("id"),
