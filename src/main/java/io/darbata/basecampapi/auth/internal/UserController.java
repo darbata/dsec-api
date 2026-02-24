@@ -2,11 +2,11 @@ package io.darbata.basecampapi.auth.internal;
 
 import io.darbata.basecampapi.auth.AuthService;
 import io.darbata.basecampapi.auth.UserDTO;
+import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.auth.internal.request.AuthUserRequest;
 import io.darbata.basecampapi.github.GithubExchangeTokenEvent;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.github.GithubService;
-import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,11 +22,13 @@ class UserController {
     private final AuthService authService;
     private final ApplicationEventPublisher publisher;
     private final GithubService githubService;
+    private final UserService userService;
 
-    UserController(AuthService authService, ApplicationEventPublisher publisher, GithubService githubService) {
+    UserController(AuthService authService, ApplicationEventPublisher publisher, GithubService githubService, UserService userService) {
         this.authService = authService;
         this.publisher = publisher;
         this.githubService = githubService;
+        this.userService = userService;
     }
 
 
@@ -91,5 +93,16 @@ class UserController {
         }
     }
 
-
+    @PutMapping("/user/avatar/upload")
+    ResponseEntity<?>  uploadAvatar(@AuthenticationPrincipal Jwt jwt, @RequestParam String type, @RequestHeader("Content-Type") String contentType) {
+        try {
+            String userId = jwt.getClaimAsString("sub");
+            String url = userService.updateAvatarUrlWithUpload(userId, type, contentType);
+            return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName());
+            System.err.println("Error registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.modulith.core.ApplicationModules;
 
-@SpringBootApplication
 @ConfigurationPropertiesScan
 public class ModularityTests {
     static ApplicationModules modules = ApplicationModules.of(BasecampApiApplication.class);
