@@ -30,9 +30,6 @@ public class UserService {
     }
 
     public String updateAvatarUrlWithUpload(String id, String type, String contentType) {
-
-        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No user"));
-
         String extension = "";
 
         if (type.equals("image/jpeg")) {
@@ -50,5 +47,9 @@ public class UserService {
         cloudService.updateUserAvatarUrl(id, avatarUrl);
 
         return putUrl;
+    }
+
+    public void updateUserDisplayName(String id, String displayName) {
+        cloudService.updateUserDisplayName(id, displayName);
     }
 }

@@ -16,4 +16,9 @@ public interface ApiGatewayClient {
     void updateUserAvatarUrl(
             @RequestBody UpdateUserAvatarUrlRequestBody body
     );
+
+    @PutExchange(value = invokeUrl + "/user/username")
+    void updateUserUsername(
+            @RequestBody UpdateUserUsernameRequestBody body
+    );
 }

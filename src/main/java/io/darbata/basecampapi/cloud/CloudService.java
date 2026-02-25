@@ -65,4 +65,13 @@ public class CloudService {
             throw new RuntimeException(e);
         }
     }
+
+    public void updateUserDisplayName(String id, String displayName) {
+        UpdateUserUsernameRequestBody body = new UpdateUserUsernameRequestBody(
+                cognitoPoolId,
+                id,
+                displayName
+        );
+        apiGatewayClient.updateUserUsername(body);
+    }
 }

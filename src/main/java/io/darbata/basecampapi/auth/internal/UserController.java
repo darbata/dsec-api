@@ -94,11 +94,24 @@ class UserController {
     }
 
     @PutMapping("/user/avatar/upload")
-    ResponseEntity<?>  uploadAvatar(@AuthenticationPrincipal Jwt jwt, @RequestParam String type, @RequestHeader("Content-Type") String contentType) {
+    ResponseEntity<?> uploadAvatar(@AuthenticationPrincipal Jwt jwt, @RequestParam String type, @RequestHeader("Content-Type") String contentType) {
         try {
             String userId = jwt.getClaimAsString("sub");
             String url = userService.updateAvatarUrlWithUpload(userId, type, contentType);
             return ResponseEntity.ok(url);
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName());
+            System.err.println("Error registering user: " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/user/username")
+    ResponseEntity<?> updateUserDisplayName(@AuthenticationPrincipal Jwt jwt, @RequestParam String newDisplayName) {
+        try {
+            String userId = jwt.getClaimAsString("sub");
+            userService.updateUserDisplayName(userId, newDisplayName);
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
             System.err.println(e.getClass().getName());
             System.err.println("Error registering user: " + e.getMessage());
