@@ -17,8 +17,25 @@ public class CloudService {
     @Value("${aws.asset-bucket}")
     private String bucket;
 
-    public String createUserAvaterPutUrl(String userId, String extension, String contentType) {
-        String path = "user/" + userId + "/pfp" + extension;
+    @Value("${aws.cognito.user-pool.id}")
+    private String cognitoPoolId;
+
+    private final ApiGatewayClient  apiGatewayClient;
+
+    public CloudService(ApiGatewayClient apiGatewayClient) {
+        this.apiGatewayClient = apiGatewayClient;
+    }
+
+    public void updateUserAvatarUrl(String userId, String avatarUrl) {
+        UpdateUserAvatarUrlRequestBody body = new UpdateUserAvatarUrlRequestBody(
+                cognitoPoolId,
+                userId,
+                avatarUrl
+        );
+        apiGatewayClient.updateUserAvatarUrl(body);
+    }
+
+    public String createUserAvaterPutUrl(String path, String contentType) {
         System.out.println(bucket);
         return createPresignedUrl(bucket, path, contentType);
     }

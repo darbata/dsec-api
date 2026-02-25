@@ -4,7 +4,9 @@ import io.darbata.basecampapi.auth.internal.UserRepository;
 import io.darbata.basecampapi.auth.internal.model.User;
 import io.darbata.basecampapi.cloud.CloudService;
 import io.darbata.basecampapi.github.GithubService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserService {
@@ -28,6 +30,9 @@ public class UserService {
     }
 
     public String updateAvatarUrlWithUpload(String id, String type, String contentType) {
+
+        User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No user"));
+
         String extension = "";
 
         if (type.equals("image/jpeg")) {
@@ -38,9 +43,11 @@ public class UserService {
             throw new RuntimeException("Invalid object type");
         }
 
-        String putUrl = cloudService.createUserAvaterPutUrl(id, extension, contentType);
+        String path = "user/" + id + "/pfp" + extension;
 
-        System.out.println(putUrl);
+        String putUrl = cloudService.createUserAvaterPutUrl(path, contentType);
+        String avatarUrl = "https://dsec-basecamp-assets.s3.ap-southeast-2.amazonaws.com/" + path;
+        cloudService.updateUserAvatarUrl(id, avatarUrl);
 
         return putUrl;
     }
