@@ -1,5 +1,6 @@
 package io.darbata.basecampapi.github.internal;
 
+import io.darbata.basecampapi.github.FetchOrganisationProjectsResponse;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
 import io.darbata.basecampapi.github.internal.dto.githubproject.GithubGraphQLResponse;
@@ -60,6 +61,12 @@ public interface GithubApiClient {
 
     @PostExchange(value = "https://api.github.com/graphql", contentType = "application/json")
     GithubGraphQLResponse queryGraphQL(
+            @RequestHeader("Authorization") String token,
+            @RequestBody GraphQLRequest body
+    );
+
+    @PostExchange(value = "https://api.github.com/graphql", contentType = "application/json")
+    FetchOrganisationProjectsResponse queryProjectsGraphQL(
             @RequestHeader("Authorization") String token,
             @RequestBody GraphQLRequest body
     );

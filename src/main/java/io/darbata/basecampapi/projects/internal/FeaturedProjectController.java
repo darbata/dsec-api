@@ -5,6 +5,7 @@ import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.github.GithubService;
 import io.darbata.basecampapi.github.ProjectItemDTO;
 import io.darbata.basecampapi.projects.FeaturedProjectDTO;
+import io.darbata.basecampapi.projects.GithubProject;
 import io.darbata.basecampapi.projects.ProjectService;
 import io.darbata.basecampapi.projects.internal.request.CreateFeaturedProjectRequest;
 import org.springframework.http.ResponseEntity;
@@ -112,6 +113,19 @@ class FeaturedProjectController {
             String userId = jwt.getClaimAsString("sub");
             projectService.assignProjectIssueToUser(userId, projectId, issueNumber);
             return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/organisation/projects")
+    public ResponseEntity<?> getKanbans(@AuthenticationPrincipal Jwt jwt) {
+        try {
+            String userId = jwt.getClaimAsString("sub");
+            List<GithubProject> dto = githubService.getKanbans();
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());

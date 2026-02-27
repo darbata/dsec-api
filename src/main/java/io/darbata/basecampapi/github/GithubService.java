@@ -9,6 +9,7 @@ import io.darbata.basecampapi.github.internal.dto.githubproject.ProjectV2;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
 import io.darbata.basecampapi.projects.ProjectService;
 import io.darbata.basecampapi.projects.FeaturedProjectDTO;
+import io.darbata.basecampapi.projects.GithubProject;
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -204,5 +205,10 @@ public class GithubService {
                 .id();
 
         githubAPIService.updateItemStatus(token, project.id(), item.id(), status.field().id(), intendedStatusOptionId);
+    }
+
+    public List<GithubProject> getKanbans() throws Exception {
+        InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
+        return githubAPIService.fetchGithubOrganisationProjects(token);
     }
 }

@@ -3,6 +3,7 @@ package io.darbata.basecampapi.github;
 import io.darbata.basecampapi.github.internal.*;
 import io.darbata.basecampapi.github.internal.dto.githubproject.GithubGraphQLResponse;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
+import io.darbata.basecampapi.projects.GithubProject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestHeader;
 
@@ -131,6 +132,35 @@ class GithubAPIService {
                 new GraphQLRequest(query)
         );
     }
+
+    public List<GithubProject> fetchGithubOrganisationProjects(
+            InstallationAccessToken token
+    ) {
+        String query = """
+            query {
+                organization(login: "dsec-hub") {
+                    projectsV2(first: 30) {
+                        nodes {
+                            id
+                            title
+                            number
+                            url
+                            closed
+                        }
+                    }
+                }
+            }
+        """;
+
+        FetchOrganisationProjectsResponse response = client.queryProjectsGraphQL(
+                "Bearer " + token.token(),
+                new GraphQLRequest(query)
+        );
+
+        return response.data().organization().projectsV2().nodes();
+    }
+
+
 
     public void updateItemStatus(InstallationAccessToken token, String projectId, String itemId, String fieldId, String valueId) {
         String mutation = """
