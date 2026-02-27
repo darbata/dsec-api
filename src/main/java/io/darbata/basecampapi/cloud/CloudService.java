@@ -35,8 +35,7 @@ public class CloudService {
         apiGatewayClient.updateUserAvatarUrl(body);
     }
 
-    public String createUserAvaterPutUrl(String path, String contentType) {
-        System.out.println(bucket);
+    public String getPutUrl(String path, String contentType) {
         return createPresignedUrl(bucket, path, contentType);
     }
 

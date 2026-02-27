@@ -4,6 +4,8 @@ import io.darbata.basecampapi.projects.FeaturedProjectDTO;
 import io.darbata.basecampapi.projects.internal.dto.UserProjectDTO;
 import io.darbata.basecampapi.projects.internal.model.Project;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -48,20 +50,30 @@ public class ProjectRepository {
     public Project save(Project project) {
         String sql = """
             INSERT INTO projects (title, description, tagline, banner_url, featured, owner_id, repo_id)
-            VALUES (:title, :description, :tagline, :bannerUrl, :featured, :ownerId, :repoId);
+            VALUES (:title, :description, :tagline, :bannerUrl, :featured, :ownerId, :repoId)
+            ON CONFLICT (title) DO UPDATE SET
+                description = EXCLUDED.description,
+                tagline = EXCLUDED.tagline,
+                banner_url = EXCLUDED.banner_url,
+                featured = EXCLUDED.featured,
+                owner_id = EXCLUDED.owner_id,
+                repo_id = EXCLUDED.repo_id
+            RETURNING id;
         """;
 
-        jdbcClient.sql(sql)
-                .param("title", project.getTitle())
-                .param("description", project.getDescription())
-                .param("tagline", project.getTagline())
-                .param("bannerUrl", project.getBannerUrl())
-                .param("featured", project.isFeatured())
-                .param("ownerId", project.getOwnerId())
-                .param("repoId", project.getRepoId())
-            .update();
+         UUID generatedId = jdbcClient.sql(sql)
+                    .param("title", project.getTitle())
+                    .param("description", project.getDescription())
+                    .param("tagline", project.getTagline())
+                    .param("bannerUrl", project.getBannerUrl())
+                    .param("featured", project.isFeatured())
+                    .param("ownerId", project.getOwnerId())
+                    .param("repoId", project.getRepoId())
+                    .query(UUID.class)
+                    .single();
 
-        return project;
+         project.setId(generatedId);
+         return project;
     }
 
     public List<UserProjectDTO> fetchCommunityProjects(int pageSize, int pageNum) {

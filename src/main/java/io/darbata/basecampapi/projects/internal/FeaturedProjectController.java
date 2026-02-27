@@ -68,11 +68,25 @@ class FeaturedProjectController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody CreateFeaturedProjectRequest request) {
         try {
-            String callerId = jwt.getClaimAsString("sub");
-            projectService.createFeaturedProject(
-                    callerId, request.title(), request.tagline(), request.bannerUrl(), request.description(),
-                    request.repoId());
-            return ResponseEntity.ok().build();
+            System.out.println(request);
+            FeaturedProjectDTO dto = projectService.createFeaturedProject(request.title(), request.tagline(), request.description(), request.repoId());
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{id}/banner")
+    public ResponseEntity<?> updateFeaturedProjectBanner(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID id,
+            @RequestParam String type
+    ) {
+        try {
+            String uploadUrl = projectService.uploadBanner(id, type);
+            return ResponseEntity.ok(uploadUrl);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println(e.getMessage());

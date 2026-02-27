@@ -42,7 +42,7 @@ public class UserService {
 
         String path = "user/" + id + "/pfp" + extension;
 
-        String putUrl = cloudService.createUserAvaterPutUrl(path, contentType);
+        String putUrl = cloudService.getPutUrl(path, contentType);
         String avatarUrl = "https://dsec-basecamp-assets.s3.ap-southeast-2.amazonaws.com/" + path;
         cloudService.updateUserAvatarUrl(id, avatarUrl);
 

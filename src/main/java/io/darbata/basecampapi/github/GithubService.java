@@ -43,11 +43,30 @@ public class GithubService {
         return githubAPIService.fetchUserRepositories(token);
     }
 
-    public GithubRepository findById(String callerId, long id) {
+    public GithubRepository findUserProjectById(String callerId, long id) {
         // callerId is the id of the current auth user whose token we will be using
         return repository.findById(id)
                 .orElseGet(() -> fetchGithubRepository(callerId, id)); // else fetch from api
     }
+
+    public GithubRepository findFeaturedProjectById(long id) {
+        return repository.findById(id)
+                .orElseGet(() -> {
+                    try {
+                        return fetchDsecGithubRepository(id);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+    }
+
+    public GithubRepository fetchDsecGithubRepository(long id) throws Exception {
+        InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
+        GithubRepository repo = githubAPIService.fetchDsecGithubRepositoryById(token, id); // call api
+        repository.save(repo); // save (cache) it
+        return repository.findById(id).orElseThrow();
+    }
+
 
     public void delete(long repoId) {
         repository.delete(repoId);
@@ -70,7 +89,7 @@ public class GithubService {
     }
 
     public IssueComment createIssueComment(String callerId, long repoId, int issueNumber, String comment) {
-        GithubRepository repo = findById(callerId, repoId);
+        GithubRepository repo = findUserProjectById(callerId, repoId);
 
         String[] repoNameSplit = repo.name().split("/");
         String repoName = repoNameSplit[repoNameSplit.length - 1];
@@ -88,7 +107,7 @@ public class GithubService {
     public void assignIssueToSelf(String callerId, long repoId, int issueNumber) throws Exception {
         InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
         GithubUser user = getAuthenticatedUser(callerId);
-        GithubRepository repo = findById(callerId, repoId);
+        GithubRepository repo = findUserProjectById(callerId, repoId);
         githubAPIService.assignGithubIssue(token, repo.name(), issueNumber, user.login());
     }
 

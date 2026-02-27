@@ -72,14 +72,14 @@ public class Project {
     public String getDescription() { return description; }
     public String getBannerUrl() { return bannerUrl; }
     public int getGithubProjectNum() {return githubProjectNum;}
+    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
 
     // used only by factory methods
-    private void setId(UUID id) {this.id = id;}
+    public void setId(UUID id) {this.id = id;}
     private void setOwnerId(String ownerId) {this.ownerId = ownerId;}
     private void setRepoId(long repoId) {this.repoId = repoId;}
     private void setFeatured(Boolean featured) { this.featured = featured; }
     private void setTagline(String tagline) { this.tagline = tagline; }
-    private void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
     private void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     private void setGithubProjectNum(int githubProjectNum) {this.githubProjectNum = githubProjectNum;}
 }

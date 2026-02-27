@@ -40,6 +40,13 @@ class GithubAPIService {
                 repo.stars(), repo.pushedAt(), repo.owner());
     }
 
+
+    public GithubRepository fetchDsecGithubRepositoryById(InstallationAccessToken token, long id) {
+        GithubRepository repo = client.getRepository(token.token(), id);
+        return new GithubRepository(repo.id(), repo.name(), repo.url(), repo.language(), repo.openTickets(),
+                repo.stars(), repo.pushedAt(), repo.owner());
+    }
+
     public IssueComment commentOnIssue(GithubToken token, String projectOwner, String repoName, int issueNumber, String comment) {
 
         System.out.println("Posting to " + projectOwner + "/" + repoName + "/" + issueNumber);
@@ -180,6 +187,7 @@ class GithubAPIService {
                 assignees
         );
     }
+
 }
 
 
