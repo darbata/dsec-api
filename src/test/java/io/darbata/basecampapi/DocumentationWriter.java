@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.modulith.core.ApplicationModules;
 import org.springframework.modulith.docs.Documenter;
 
+@Disabled
 public class DocumentationWriter {
     @Test
     @Disabled("enable or run manually, don't run this be default")
