@@ -4,7 +4,6 @@ import io.darbata.basecampapi.github.internal.GithubApiClient;
 import io.darbata.basecampapi.github.internal.GithubTokenRepository;
 import io.darbata.basecampapi.github.internal.TokenEncryptionService;
 import io.darbata.basecampapi.github.internal.dto.GithubTokenDTO;
-import io.darbata.basecampapi.github.internal.exception.GithubCodeTokenExchangeException;
 import io.darbata.basecampapi.github.internal.model.GithubToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
@@ -45,7 +44,7 @@ class GithubTokenService {
                     }
                     return token; // can be null
                 });
-        return t.orElse(null);
+        return t.orElseThrow(() -> new NoGithubTokenException("User does not have their GitHub account linked."));
     }
 
     public void revokeUserToken(String userId) {

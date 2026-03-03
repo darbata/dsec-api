@@ -47,15 +47,9 @@ class UserController {
 
     @GetMapping("/github/repos")
     ResponseEntity<?> fetchUserGithubRepositories(@AuthenticationPrincipal Jwt jwt) {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            List<GithubRepository> repos = githubService.fetchUserGithubRepositories(userId);
-            return ResponseEntity.ok(repos);
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        List<GithubRepository> repos = githubService.fetchUserGithubRepositories(userId);
+        return ResponseEntity.ok(repos);
     }
 
     // returns who is authenticated?
