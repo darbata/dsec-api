@@ -44,7 +44,7 @@ class GithubTokenService {
                     }
                     return token; // can be null
                 });
-        return t.orElseThrow(() -> new NoGithubTokenException("User does not have their GitHub account linked."));
+        return t.orElse(null);
     }
 
     public void revokeUserToken(String userId) {
