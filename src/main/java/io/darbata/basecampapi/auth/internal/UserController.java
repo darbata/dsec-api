@@ -34,15 +34,9 @@ class UserController {
 
     @PostMapping("/github/oauth")
     ResponseEntity<?> enableGithubOauth(@AuthenticationPrincipal Jwt jwt, @RequestParam String code) {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            publisher.publishEvent(new GithubExchangeTokenEvent(userId, code));
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        publisher.publishEvent(new GithubExchangeTokenEvent(userId, code));
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/github/repos")
@@ -57,59 +51,36 @@ class UserController {
     // UUID from Cognito will never change, but name and email may
     @GetMapping("/auth")
     ResponseEntity<?> fetchUserDetails(@AuthenticationPrincipal Jwt jwt) {
-        try {
-            AuthUserRequest request = new AuthUserRequest(
-                    jwt.getClaimAsString("sub"),
-                    jwt.getClaimAsString("email"),
-                    jwt.getClaimAsString("preferred_username"),
-                    jwt.getClaimAsString("custom:discord_display_name"), // default null
-                    jwt.getClaimAsString("custom:avatar_url") // default null
-            );
-            UserDTO dto = authService.save(request);
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        AuthUserRequest request = new AuthUserRequest(
+                jwt.getClaimAsString("sub"),
+                jwt.getClaimAsString("email"),
+                jwt.getClaimAsString("preferred_username"),
+                jwt.getClaimAsString("custom:discord_display_name"), // default null
+                jwt.getClaimAsString("custom:avatar_url") // default null
+        );
+        UserDTO dto = authService.save(request);
+        return ResponseEntity.ok(dto);
+
     }
 
     @DeleteMapping("/github/oauth")
     ResponseEntity<?> deleteGithubToken(@AuthenticationPrincipal Jwt jwt) {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            authService.disconnectGithub(userId);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        authService.disconnectGithub(userId);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/user/avatar/upload")
     ResponseEntity<?> uploadAvatar(@AuthenticationPrincipal Jwt jwt, @RequestParam String type, @RequestHeader("Content-Type") String contentType) {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            String url = userService.updateAvatarUrlWithUpload(userId, type, contentType);
-            return ResponseEntity.ok(url);
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        String url = userService.updateAvatarUrlWithUpload(userId, type, contentType);
+        return ResponseEntity.ok(url);
     }
 
     @PutMapping("/user/username")
     ResponseEntity<?> updateUserDisplayName(@AuthenticationPrincipal Jwt jwt, @RequestParam String newDisplayName) {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            userService.updateUserDisplayName(userId, newDisplayName);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            System.err.println(e.getClass().getName());
-            System.err.println("Error registering user: " + e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        userService.updateUserDisplayName(userId, newDisplayName);
+        return ResponseEntity.noContent().build();
     }
 }

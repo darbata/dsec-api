@@ -4,6 +4,7 @@ import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.cloud.CloudService;
 import io.darbata.basecampapi.common.InvalidUploadTypeException;
+import io.darbata.basecampapi.common.NotFoundException;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.github.GithubService;
@@ -57,11 +58,16 @@ public class ProjectService {
         return new PageDTO<>(projects, "pushed_at", false, pageSize, pageNum);
     }
 
-    public FeaturedProjectDTO getFeaturedProjectById(String callerId, UUID id) throws Exception {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new Exception("no project found"));
-        GithubRepository repo = githubService.findUserProjectById(callerId, project.getRepoId());
-        UserDTO user = userService.findUserById(project.getOwnerId());
-        return FeaturedProjectDTO.from(project, user, repo);
+    public FeaturedProjectDTO getFeaturedProjectById(String callerId, UUID id) {
+        try {
+            Project project = projectRepository.findById(id).orElseThrow(() -> new Exception("no project found"));
+            GithubRepository repo = githubService.findUserProjectById(callerId, project.getRepoId());
+            UserDTO user = userService.findUserById(project.getOwnerId());
+            return FeaturedProjectDTO.from(project, user, repo);
+        } catch (Exception e) {
+            throw new NotFoundException("projects not found not found");
+        }
+
     }
 
     public FeaturedProjectDTO createFeaturedProject(
@@ -96,12 +102,17 @@ public class ProjectService {
         return putUrl;
     }
 
-    public void assignProjectIssueToUser(String userId, UUID projectId, int issueNumber) throws Exception {
-        Project project = projectRepository.findById(projectId).orElseThrow();
-        String message = "Assigned issue to self - Basecamp";
-        githubService.createIssueComment(userId, project.getRepoId(), issueNumber, message);
-        githubService.assignIssueToSelf(userId, project.getRepoId(), issueNumber);
-        githubService.updateItemStatus(project.getGithubProjectNum(), issueNumber, IssueStatus.IN_PROGRESS);
+    public void assignProjectIssueToUser(String userId, UUID projectId, int issueNumber) {
+        try {
+            Project project = projectRepository.findById(projectId).orElseThrow();
+            String message = "Assigned issue to self - Basecamp";
+            githubService.createIssueComment(userId, project.getRepoId(), issueNumber, message);
+            githubService.assignIssueToSelf(userId, project.getRepoId(), issueNumber);
+            githubService.updateItemStatus(project.getGithubProjectNum(), issueNumber, IssueStatus.IN_PROGRESS);
+        } catch (Exception e) {
+            throw new AssignmentIssueException("Unable to assign project to user");
+        }
+
     }
 
     private void updateProjectBannerImageUrl(UUID projectId, String bannerUrl) {

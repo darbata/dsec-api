@@ -66,12 +66,17 @@ public class InstallationAccessTokenService {
                 .compact();
     }
 
-    public InstallationAccessToken getInstallationAccessToken() throws Exception {
-        String jwt = generateJwtToken();
-        return githubApiClient.getInstallationAccessToken(
-                "Bearer " + jwt,
-                installationId
-        );
+    public InstallationAccessToken getInstallationAccessToken() {
+        try {
+            String jwt = generateJwtToken();
+            return githubApiClient.getInstallationAccessToken(
+                    "Bearer " + jwt,
+                    installationId
+            );
+        } catch (Exception e) {
+            throw new TokenGenerationException("Problem generating application's token");
+        }
+
     }
 
 

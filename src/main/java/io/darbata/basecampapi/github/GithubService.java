@@ -114,7 +114,7 @@ public class GithubService {
     }
 
 
-    public List<ProjectItemDTO> fetchProjectItems(UUID projectId) throws Exception {
+    public List<ProjectItemDTO> fetchProjectItems(UUID projectId) {
         InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
         FeaturedProjectDTO project = projectService.getFeaturedProjectById(token.token(), projectId);
         System.out.println("Fetching items from project number: " + project.githubProjectNumber());
@@ -176,7 +176,7 @@ public class GithubService {
         }).toList();
     }
 
-    public List<GithubRepository> fetchOrganisationRepositories() throws Exception {
+    public List<GithubRepository> fetchOrganisationRepositories() {
         InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
         return githubAPIService.fetchOrganisationRepositories(token);
     }
@@ -208,7 +208,7 @@ public class GithubService {
         githubAPIService.updateItemStatus(token, project.id(), item.id(), status.field().id(), intendedStatusOptionId);
     }
 
-    public List<GithubProject> getKanbans() throws Exception {
+    public List<GithubProject> getKanbans() {
         InstallationAccessToken token = installationAccessTokenService.getInstallationAccessToken();
         return githubAPIService.fetchGithubOrganisationProjects(token);
     }
