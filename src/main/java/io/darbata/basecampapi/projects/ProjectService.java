@@ -3,6 +3,7 @@ package io.darbata.basecampapi.projects;
 import io.darbata.basecampapi.auth.UserDTO;
 import io.darbata.basecampapi.auth.UserService;
 import io.darbata.basecampapi.cloud.CloudService;
+import io.darbata.basecampapi.common.InvalidUploadTypeException;
 import io.darbata.basecampapi.github.GithubRepository;
 import io.darbata.basecampapi.common.PageDTO;
 import io.darbata.basecampapi.github.GithubService;
@@ -76,7 +77,7 @@ public class ProjectService {
         return FeaturedProjectDTO.from(project, user, repo);
     }
 
-    public String uploadBanner(UUID projectId, String bannerImageType) {
+    public String uploadBanner(UUID projectId, String bannerImageType) throws InvalidUploadTypeException {
         String extension = "";
 
         if (bannerImageType.equals("image/jpeg")) {
@@ -84,7 +85,7 @@ public class ProjectService {
         } else if (bannerImageType.equals("image/png")) {
             extension = ".png";
         } else {
-            throw new RuntimeException("Invalid object type");
+            throw new InvalidUploadTypeException("Invalid object type");
         }
 
         String path = "project/" + projectId + "/banner" + extension;

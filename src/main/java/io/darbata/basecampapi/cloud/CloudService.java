@@ -60,8 +60,7 @@ public class CloudService {
             PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
             return presignedRequest.url().toExternalForm();
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            throw new InvalidPresignRequestException("Error creating presign exception");
         }
     }
 

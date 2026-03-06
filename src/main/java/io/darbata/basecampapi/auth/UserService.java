@@ -3,6 +3,7 @@ package io.darbata.basecampapi.auth;
 import io.darbata.basecampapi.auth.internal.UserRepository;
 import io.darbata.basecampapi.auth.internal.model.User;
 import io.darbata.basecampapi.cloud.CloudService;
+import io.darbata.basecampapi.common.InvalidUploadTypeException;
 import io.darbata.basecampapi.github.GithubService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class UserService {
                user.avatarUrl(), githubConnected);
     }
 
-    public String updateAvatarUrlWithUpload(String id, String type, String contentType) {
+    public String updateAvatarUrlWithUpload(String id, String type, String contentType) throws InvalidUploadTypeException {
         String extension = "";
 
         if (type.equals("image/jpeg")) {
@@ -37,7 +38,7 @@ public class UserService {
         } else if (type.equals("image/png")) {
             extension = ".png";
         } else {
-            throw new RuntimeException("Invalid object type");
+            throw new InvalidUploadTypeException("Invalid object type");
         }
 
         String path = "user/" + id + "/pfp" + extension;

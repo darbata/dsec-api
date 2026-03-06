@@ -1,5 +1,6 @@
 package io.darbata.basecampapi.github;
 
+import io.darbata.basecampapi.common.NotFoundException;
 import io.darbata.basecampapi.github.internal.GithubUser;
 import io.darbata.basecampapi.github.internal.InstallationAccessToken;
 import io.darbata.basecampapi.github.internal.IssueComment;
@@ -56,7 +57,7 @@ public class GithubService {
                     try {
                         return fetchDsecGithubRepository(id);
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new NotFoundException("Repository does not exist");
                     }
                 });
     }
@@ -125,12 +126,12 @@ public class GithubService {
         System.out.println(response);
 
         if (response == null || response.data() == null || response.data().organization() == null ) {
-            throw new RuntimeException("Github API returned no organisation data");
+            throw new NotFoundException("Github API returned no organisation data");
         }
 
         ProjectV2 projectV2 = response.data().organization().projectV2();
         if (projectV2 == null) {
-            throw new RuntimeException("Project #" + project.githubProjectNumber() + " not found");
+            throw new NotFoundException("Project #" + project.githubProjectNumber() + " not found");
         }
 
         return projectV2.items().nodes().stream().map((projectNode) -> {
@@ -191,17 +192,17 @@ public class GithubService {
                 .stream()
                 .filter(itemNode -> itemNode.content().number() == itemNumber)
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("item not found"));
+                .orElseThrow(() -> new NotFoundException("item not found"));
 
         FieldValueNode status = item.fieldValues().nodes().stream()
                 .filter(fieldValueNode -> fieldValueNode != null && fieldValueNode.field() != null && "Status".equals(fieldValueNode.field().name()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("status not found"));
+                .orElseThrow(() -> new NotFoundException("status not found"));
 
         String intendedStatusOptionId = status.field().options().stream()
                 .filter(option -> option != null && option.name().equals(newStatus.getValue()))
                 .findAny()
-                .orElseThrow(() -> new RuntimeException("no status field found"))
+                .orElseThrow(() -> new NotFoundException("no status field found"))
                 .id();
 
         githubAPIService.updateItemStatus(token, project.id(), item.id(), status.field().id(), intendedStatusOptionId);
