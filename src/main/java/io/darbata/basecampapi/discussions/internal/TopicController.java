@@ -29,25 +29,14 @@ class TopicController {
 
     @GetMapping("/{unitCode}")
     public ResponseEntity<?> getTopicDetails(@PathVariable String unitCode) {
-        // accept unit code
-        try {
-            UnitTopicDetailsDTO dto = topicService.getUnitTopicDetailsWithRootDiscussions(unitCode);
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
-        }
+        UnitTopicDetailsDTO dto = topicService.getUnitTopicDetailsWithRootDiscussions(unitCode);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/discussions/{discussionId}")
     public ResponseEntity<?> getDiscussionThread(@PathVariable UUID discussionId) {
-        try {
-            DiscussionThreadDTO dto = topicService.getDiscussionThread(discussionId);
-            return ResponseEntity.ok(dto);
-        }  catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().build();
-        }
+        DiscussionThreadDTO dto = topicService.getDiscussionThread(discussionId);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/discussions/{discussionId}")
@@ -55,43 +44,27 @@ class TopicController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody CreateDiscussionRequest request
     ) {
-        try {
-            String id = jwt.getClaimAsString("sub");
-            DiscussionDTO dto = topicService.createReplyToDiscussion(id, request.parentDiscussionId(), request.content());
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String id = jwt.getClaimAsString("sub");
+        DiscussionDTO dto = topicService.createReplyToDiscussion(id, request.parentDiscussionId(), request.content());
+        return ResponseEntity.ok(dto);
+
     }
 
     @GetMapping("/units")
     public ResponseEntity<?> getUnitTopics()
     {
-        try {
-            List<UnitTopicDTO> dto = topicService.getUnitTopics();
-            return  ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        List<UnitTopicDTO> dto = topicService.getUnitTopics();
+        return  ResponseEntity.ok(dto);
+
     }
 
     @PostMapping("/{unit}")
     public ResponseEntity<?> createUnitTopicDiscussion(
             @AuthenticationPrincipal Jwt jwt, @PathVariable String unit, @RequestBody CreateDiscussionRequest request)
     {
-        try {
-            String userId = jwt.getClaimAsString("sub");
-            DiscussionDTO dto = topicService.createUnitTopicDiscussion(
-                    unit, request.parentDiscussionId(), userId, request.content());
-            return  ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return ResponseEntity.badRequest().build();
-        }
+        String userId = jwt.getClaimAsString("sub");
+        DiscussionDTO dto = topicService.createUnitTopicDiscussion(
+                unit, request.parentDiscussionId(), userId, request.content());
+        return  ResponseEntity.ok(dto);
     }
-
 }
