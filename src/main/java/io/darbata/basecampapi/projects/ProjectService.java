@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,8 +35,8 @@ public class ProjectService {
         this.cloudService = cloudService;
     }
 
-    public UserProjectDTO getById(String callerId, UUID id) throws Exception {
-        Project project = projectRepository.findById(id).orElseThrow(() -> new Exception("no project with this id"));
+    public UserProjectDTO getById(String callerId, UUID id) throws NotFoundException {
+        Project project = projectRepository.findById(id).orElseThrow(() -> new NotFoundException("no project with this id"));
         GithubRepository repo = githubService.findUserProjectById(callerId, project.getRepoId());
         UserDTO user = userService.findUserById(project.getOwnerId());
         return UserProjectDTO.from(project, user, repo);
@@ -119,6 +120,20 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId).orElseThrow();
         project.setBannerUrl(bannerUrl);
         projectRepository.save(project);
+    }
+
+    public List<UserProjectDTO> getUserSharedProjects(String userId) {
+        return projectRepository.fetchUserCommunityProjects(userId);
+    }
+
+    public void deleteUserProject(String userId, UUID projectId) {
+        Optional<Project> project = projectRepository.findById(projectId);
+
+        if (project.isEmpty() || !userId.equals(project.get().getOwnerId())) return;
+        System.out.println(userId  + "|" + project.get().getOwnerId());
+
+        projectRepository.deleteProjectById(projectId);
+
     }
 }
 

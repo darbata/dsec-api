@@ -79,7 +79,12 @@ public class GithubService {
     }
 
     public boolean validateUserToken(String userId) {
-        return tokenService.getUserToken(userId) != null;
+        try {
+            GithubToken githubToken = tokenService.getUserToken(userId);
+            return githubToken != null;
+        } catch (NoGithubTokenException e) {
+            return false;
+        }
     }
 
     private GithubRepository fetchGithubRepository(String callerId, long id) {

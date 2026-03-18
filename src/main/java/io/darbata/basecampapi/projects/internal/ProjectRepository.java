@@ -180,4 +180,60 @@ public class ProjectRepository {
                 })
                 .list();
     }
+
+    public List<UserProjectDTO> fetchUserCommunityProjects(String userId) {
+        String sql = """
+            SELECT
+                p.id AS id,
+                p.title AS title,
+                p.description AS description,
+                u.display_name AS ownerDisplayName,
+                u.avatar_url AS ownerAvatarUrl,
+                g.id AS repoId,
+                g.name AS repoName,
+                g.url AS repoUrl,
+                g.language AS repoLanguage,
+                g.open_tickets AS repoOpenTickets,
+                g.contributors AS repoContributors,
+                g.stars AS repoStars,
+                g.pushed_at AS repoPushedAt
+            FROM projects p
+            JOIN oauth_users u ON p.owner_id = u.id
+            LEFT JOIN github_repositories g ON p.repo_id = g.id
+            WHERE featured = false AND owner_id = :userId
+            ORDER BY p.id
+        """;
+
+        return jdbcClient.sql(sql)
+                .param("userId", userId)
+                .query((rs, rowNum) -> {
+                    Timestamp ts = rs.getTimestamp("repoPushedAt");
+                    Instant pushedAtInstant = (ts != null) ? ts.toInstant() : null;
+                    return new UserProjectDTO(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("title"),
+                            rs.getString("description"),
+                            rs.getString("ownerDisplayName"),
+                            rs.getString("ownerAvatarUrl"),
+                            rs.getLong("repoId"),
+                            rs.getString("repoName"),
+                            rs.getString("repoUrl"),
+                            rs.getString("repoLanguage"),
+                            rs.getInt("repoOpenTickets"),
+                            rs.getInt("repoStars"),
+                            pushedAtInstant
+                    );
+                })
+                .list();
+    }
+
+    public void deleteProjectById(UUID projectId) {
+        String sql = """
+        DELETE FROM projects WHERE id = :projectId
+    """;
+
+        jdbcClient.sql(sql)
+                .param("projectId", projectId)
+                .update();
+    }
 }

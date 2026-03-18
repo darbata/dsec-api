@@ -44,7 +44,7 @@ class GithubTokenService {
                     }
                     return token; // can be null
                 });
-        return t.orElse(null);
+        return t.orElseThrow(() -> new NoGithubTokenException("User does not have valid Github token"));
     }
 
     public void revokeUserToken(String userId) {
