@@ -9,6 +9,7 @@ import io.darbata.basecampapi.projects.GithubProject;
 import io.darbata.basecampapi.projects.ProjectService;
 import io.darbata.basecampapi.projects.internal.request.CreateFeaturedProjectRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -48,11 +49,12 @@ class FeaturedProjectController {
     }
 
     @PostMapping("")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createFeaturedProject(
             @AuthenticationPrincipal Jwt jwt,
             @RequestBody CreateFeaturedProjectRequest request
     ) {
-        System.out.println(request);
+        jwt.getClaimAsString("sub");
         FeaturedProjectDTO dto = projectService.createFeaturedProject(request.title(), request.tagline(), request.description(), request.repoId());
         return ResponseEntity.ok(dto);
 
